@@ -1,0 +1,1 @@
+I want to make a level system that uses a link to a json file that will have the size of the level, the placement of each object and the starting position for mario

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mario Infinite</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            image-rendering: pixelated;
+        }
+
+        #canvas {
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <div id="center">
+        <canvas id="canvas" width="1280" height="720" style="border: none; margin: none;"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script src="https://ahf2139.pythonanywhere.com/cartGameLibrary.js"></script>
+    <script>eruda.init();</script>
+    <script>
+
+        cGL.initialize("canvas");
+        ctx.imageSmoothingEnabled = false;
+        canvas.width = window.innerWidth - 10;
+        canvas.height = window.innerHeight - 15;
+
+        const assetsDirectory = "http://ahf2139.pythonanywhere.com/images/marioimages";
+        const marioRightImgs = [
+            `${assetsDirectory}/Mario_Small.png`,
+            `${assetsDirectory}/Mario_Small_Walk_0.png`,
+            `${assetsDirectory}/Mario_Small_Walk_1.png`,
+            `${assetsDirectory}/Mario_Small_Walk_2.png`
+        ];
+        const marioLeftImgs = [
+            `${assetsDirectory}/Mario_Small_Left.png`,
+            `${assetsDirectory}/Mario_Small_Left_Walk_0.png`,
+            `${assetsDirectory}/Mario_Small_Left_Walk_1.png`,
+            `${assetsDirectory}/Mario_Small_Left_Walk_2.png`
+        ];
+
+        // loading the images
+        marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
+        marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
+
+        // position of objects in level
+        const levelMap = [
+            [0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0],
+        ];
+
+        // loading more images
+        const blockTextures = [];
+        for (let i = 0; i < 2; i++) { // Assuming 2 block types (ground and bricks)
+            cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
+        }
+
+        let mario = {
+            x: canvas.width / 2,
+            y: canvas.height - 128, // Adjusted for larger size
+            width: 64,               // Doubled width
+            height: 128,             // Doubled height
+            speed: 5,
+            direction: 'right',
+            frame: 0,
+            frameCount: 4,
+            animationSpeed: 10,
+            frameTimer: 0
+        };
+
+        function game() {
+            if (cGL.keysDown[37]) { // Left arrow
+                mario.x -= mario.speed;
+                mario.direction = 'left';
+                mario.frameTimer++;
+                if (mario.frameTimer >= mario.animationSpeed) {
+                    mario.frame = (mario.frame + 1) % mario.frameCount;
+                    mario.frameTimer = 0;
+                }
+            } else if (cGL.keysDown[39]) { // Right arrow
+                mario.x += mario.speed;
+                mario.direction = 'right';
+                mario.frameTimer++;
+                if (mario.frameTimer >= mario.animationSpeed) {
+                    mario.frame = (mario.frame + 1) % mario.frameCount;
+                    mario.frameTimer = 0;
+                }
+            } else {
+                mario.frame = 0; // reset to standing frame if no movement
+            }
+
+            // Ensure Mario stays within the canvas boundaries
+            if (mario.x < 0) {
+                mario.x = 0;
+            } else if (mario.x + mario.width > canvas.width) {
+                mario.x = canvas.width - mario.width;
+            }
+        }
+
+        function renderBlocks() {
+            const blockSize = mario.width; // Adjusted size to match Mario's new width
+            for (let y = 0; y < levelMap.length; y++) {
+                for (let x = 0; x < levelMap[y].length; x++) {
+                    const blockType = levelMap[y][x];
+                    if (!(blockType === 0)) {
+                        const blockTexture = blockTextures[blockType];
+                        const xPos = x * blockSize;
+                        const yPos = y * blockSize;
+                        cGL.drawImage(`block${blockType}`, xPos, yPos, blockSize, blockSize);
+                    }
+                }
+            }
+        }
+
+        function renderMario() {
+            let marioImageId = mario.direction === 'right' ? `marioRight${mario.frame}` : `marioLeft${mario.frame}`;
+            cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
+        }
+
+        function render() {
+            cGL.clear();
+            renderBlocks();
+            renderMario();
+        }
+
+        function loop(timestamp) {
+            var elapsed = timestamp - lastTime;
+            if (elapsed > frameInterval) {
+                game();
+                render();
+                lastTime = timestamp - (elapsed % frameInterval);
+            }
+            requestAnimationFrame(loop);
+        }
+
+        var lastTime = 0;
+        var frameInterval = 1000 / 60;
+
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
