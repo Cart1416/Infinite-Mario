@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mario Infinite</title>
     <style>
+        @font-face {
+            font-family: '8bit';
+            src: url('http://ahf2139.pythonanywhere.com/images/marioimages/8bit.ttf');
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -44,7 +49,6 @@
         // Load all images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
-        const font = new FontFace("8bit", `url(${assetsDirectory}/8bit.ttf)`);
 
         // Define your level map
         const levelMap = [
@@ -217,13 +221,13 @@
             }
             cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
         }
-        
+
         function renderCoinCounter() {
             const text = `Coins: ${coinsCollected}`;
             const textWidth = ctx.measureText(text).width;
             const x = (canvas.width - textWidth) / 2;
             const y = 30;
-            cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
+            cGL.drawText(text, x, y, "24px 8bit", "black", "center", "top");
         }
 
         function render() {
@@ -246,10 +250,7 @@
         var lastTime = 0;
         var frameInterval = 1000 / 60;
         ctx.imageSmoothingEnabled = false;
-        //font.load().then((loadedFont) => {
-            //document.fonts.add(loadedFont);
-            requestAnimationFrame(loop);
-        //});
+        requestAnimationFrame(loop);
     </script>
 </body>
 </html>
