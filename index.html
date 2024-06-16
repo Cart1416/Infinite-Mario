@@ -22,7 +22,6 @@
     <script>
 
         cGL.initialize("canvas");
-        ctx.imageSmoothingEnabled = false; // Disable image smoothing for sharp pixels
         canvas.width = window.innerWidth - 10;
         canvas.height = window.innerHeight - 15;
 
@@ -235,7 +234,7 @@
 
         var lastTime = 0;
         var frameInterval = 1000 / 60;
-
+        ctx.imageSmoothingEnabled = false;
         requestAnimationFrame(loop);
     </script>
 </body>
