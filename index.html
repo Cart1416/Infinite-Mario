@@ -22,6 +22,9 @@
     <script>
 
         cGL.initialize("canvas");
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false; // Disable image smoothing for sharp pixels
         canvas.width = window.innerWidth - 10;
         canvas.height = window.innerHeight - 15;
 
@@ -76,6 +79,9 @@
         };
 
         function game() {
+            let prevX = mario.x;
+            let prevY = mario.y;
+
             if (cGL.keysDown[37]) { // Left arrow
                 mario.x -= mario.speed;
                 mario.direction = 'left';
@@ -104,19 +110,75 @@
             if (mario.jumping) {
                 mario.y += mario.jumpSpeed;
                 mario.jumpSpeed += mario.gravity;
-
-                if (mario.y >= mario.groundLevel) { // Land on the ground
-                    mario.y = mario.groundLevel;
-                    mario.jumping = false;
-                    mario.jumpSpeed = 0;
-                }
             }
+
+            // Check for collisions
+            handleCollisions(prevX, prevY);
 
             // Ensure Mario stays within the canvas boundaries
             if (mario.x < 0) {
                 mario.x = 0;
             } else if (mario.x + mario.width > canvas.width) {
                 mario.x = canvas.width - mario.width;
+            }
+        }
+
+        function handleCollisions(prevX, prevY) {
+            const blockSize = mario.width;
+            const marioTop = mario.y;
+            const marioBottom = mario.y + mario.height;
+            const marioLeft = mario.x;
+            const marioRight = mario.x + mario.width;
+
+            for (let y = 0; y < levelMap.length; y++) {
+                for (let x = 0; x < levelMap[y].length; x++) {
+                    const blockType = levelMap[y][x];
+                    if (blockType !== 0) {
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            if (prevBottom <= blockTop) { // Collision from top
+                                mario.y = blockTop - mario.height;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                            } else if (prevTop >= blockBottom) { // Collision from bottom
+                                mario.y = blockBottom;
+                                mario.jumpSpeed = 0;
+                            } else if (prevRight <= blockLeft) { // Collision from left
+                                mario.x = blockLeft - mario.width;
+                            } else if (prevLeft >= blockRight) { // Collision from right
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Update ground level based on collisions
+            if (!mario.jumping) {
+                mario.groundLevel = canvas.height - 128;
+                for (let y = 0; y < levelMap.length; y++) {
+                    for (let x = 0; x < levelMap[y].length; x++) {
+                        const blockType = levelMap[y][x];
+                        if (blockType !== 0) {
+                            const blockX = x * blockSize;
+                            const blockY = y * blockSize;
+                            const blockTop = blockY;
+                            const blockBottom = blockY + blockSize;
+                            const blockLeft = blockX;
+                            const blockRight = blockX + blockSize;
+
+                            if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                                mario.groundLevel = blockTop - mario.height;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -163,9 +225,6 @@
 
         var lastTime = 0;
         var frameInterval = 1000 / 60;
-
-        // Disable image smoothing for sharp pixels
-        ctx.imageSmoothingEnabled = false;
 
         requestAnimationFrame(loop);
     </script>
