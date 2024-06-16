@@ -217,7 +217,7 @@
             }
             cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
         }
-
+        
         function renderCoinCounter() {
             const text = `Coins: ${coinsCollected}`;
             const textWidth = ctx.measureText(text).width;
@@ -246,10 +246,10 @@
         var lastTime = 0;
         var frameInterval = 1000 / 60;
         ctx.imageSmoothingEnabled = false;
-        font.load().then((loadedFont) => {
-            document.fonts.add(loadedFont);
+        //font.load().then((loadedFont) => {
+            //document.fonts.add(loadedFont);
             requestAnimationFrame(loop);
-        });
+        //});
     </script>
 </body>
 </html>
