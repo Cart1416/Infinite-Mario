@@ -9,11 +9,6 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            image-rendering: pixelated;
-        }
-
-        #canvas {
-            image-rendering: pixelated;
         }
     </style>
 </head>
@@ -27,7 +22,6 @@
     <script>
 
         cGL.initialize("canvas");
-        ctx.imageSmoothingEnabled = false;
         canvas.width = window.innerWidth - 10;
         canvas.height = window.innerHeight - 15;
 
@@ -36,63 +30,89 @@
             `${assetsDirectory}/Mario_Small.png`,
             `${assetsDirectory}/Mario_Small_Walk_0.png`,
             `${assetsDirectory}/Mario_Small_Walk_1.png`,
-            `${assetsDirectory}/Mario_Small_Walk_2.png`
+            `${assetsDirectory}/Mario_Small_Walk_2.png`,
+            `${assetsDirectory}/Mario_Small_Jumping.png`
         ];
         const marioLeftImgs = [
             `${assetsDirectory}/Mario_Small_Left.png`,
             `${assetsDirectory}/Mario_Small_Left_Walk_0.png`,
             `${assetsDirectory}/Mario_Small_Left_Walk_1.png`,
-            `${assetsDirectory}/Mario_Small_Left_Walk_2.png`
+            `${assetsDirectory}/Mario_Small_Left_Walk_2.png`,
+            `${assetsDirectory}/Mario_Small_Left_Jumping.png`
         ];
 
+        // Load all images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
 
+        // Define your level map
         const levelMap = [
             [0, 0, 0, 0, 0],
             [1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0],
         ];
 
+        // Load block textures
         const blockTextures = [];
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 3; i++) { // Assuming 3 block types (air, ground, bricks)
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
         let mario = {
             x: canvas.width / 2,
             y: canvas.height - 128,
-            width: 64,
-            height: 128,
+            width: 32 * 2,
+            height: 64 * 2,
             speed: 5,
             direction: 'right',
             frame: 0,
             frameCount: 4,
-            animationSpeed: 7,
-            frameTimer: 0
+            animationSpeed: 10,
+            frameTimer: 0,
+            jumping: false,
+            jumpSpeed: 0,
+            gravity: 1,
+            groundLevel: canvas.height - 128 // Initial ground level
         };
 
         function game() {
-            if (cGL.keysDown[37]) {
+            if (cGL.keysDown[37]) { // Left arrow
                 mario.x -= mario.speed;
                 mario.direction = 'left';
                 mario.frameTimer++;
                 if (mario.frameTimer >= mario.animationSpeed) {
-                    mario.frame = (mario.frame + 1) % mario.frameCount;
+                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
                     mario.frameTimer = 0;
                 }
-            } else if (cGL.keysDown[39]) {
+            } else if (cGL.keysDown[39]) { // Right arrow
                 mario.x += mario.speed;
                 mario.direction = 'right';
                 mario.frameTimer++;
                 if (mario.frameTimer >= mario.animationSpeed) {
-                    mario.frame = (mario.frame + 1) % mario.frameCount;
+                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
                     mario.frameTimer = 0;
                 }
             } else {
-                mario.frame = 0;
+                mario.frame = 0; // reset to standing frame if no movement
             }
 
+            if ((cGL.keysDown[38] || cGL.keysDown[32]) && !mario.jumping) { // Up arrow or space bar
+                mario.jumping = true;
+                mario.jumpSpeed = -15; // Initial jump speed
+            }
+
+            if (mario.jumping) {
+                mario.y += mario.jumpSpeed;
+                mario.jumpSpeed += mario.gravity;
+
+                if (mario.y >= mario.groundLevel) { // Land on the ground
+                    mario.y = mario.groundLevel;
+                    mario.jumping = false;
+                    mario.jumpSpeed = 0;
+                }
+            }
+
+            // Ensure Mario stays within the canvas boundaries
             if (mario.x < 0) {
                 mario.x = 0;
             } else if (mario.x + mario.width > canvas.width) {
@@ -100,8 +120,14 @@
             }
         }
 
+        function render() {
+            cGL.clear();
+            renderBlocks();
+            renderMario();
+        }
+
         function renderBlocks() {
-            const blockSize = mario.width;
+            const blockSize = mario.width; // Adjusted size to match Mario's new width
             for (let y = 0; y < levelMap.length; y++) {
                 for (let x = 0; x < levelMap[y].length; x++) {
                     const blockType = levelMap[y][x];
@@ -116,14 +142,13 @@
         }
 
         function renderMario() {
-            let marioImageId = mario.direction === 'right' ? `marioRight${mario.frame}` : `marioLeft${mario.frame}`;
+            let marioImageId;
+            if (mario.jumping) {
+                marioImageId = mario.direction === 'right' ? `marioRight4` : `marioLeft4`;
+            } else {
+                marioImageId = mario.direction === 'right' ? `marioRight${mario.frame}` : `marioLeft${mario.frame}`;
+            }
             cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
-        }
-
-        function render() {
-            cGL.clear();
-            renderBlocks();
-            renderMario();
         }
 
         function loop(timestamp) {
@@ -138,6 +163,9 @@
 
         var lastTime = 0;
         var frameInterval = 1000 / 60;
+
+        // Disable image smoothing for sharp pixels
+        cGL.context.imageSmoothingEnabled = false;
 
         requestAnimationFrame(loop);
     </script>
