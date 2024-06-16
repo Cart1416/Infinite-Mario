@@ -224,8 +224,7 @@
 
         function renderCoinCounter() {
             const text = `Coins: ${coinsCollected}`;
-            const textWidth = ctx.measureText(text).width;
-            const x = (canvas.width - textWidth) / 2;
+            const x = canvas.width / 2;
             const y = 30;
             cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
         }
