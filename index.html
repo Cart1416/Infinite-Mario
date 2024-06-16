@@ -44,6 +44,7 @@
         // Load all images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
+        const font = new FontFace("8bit", `url(${assetsDirectory}/8bit.ttf)`);
 
         // Define your level map
         const levelMap = [
@@ -84,6 +85,7 @@
             gravity: 1,
             groundLevel: canvas.height - 128
         };
+        var coinsCollected = 0;
 
         function game() {
             let prevX = mario.x;
@@ -191,12 +193,6 @@
             }
         }
 
-        function render() {
-            cGL.clear();
-            renderBlocks();
-            renderMario();
-        }
-
         function renderBlocks() {
             const blockSize = mario.width; // Adjusted size to match Mario's new width
             for (let y = 0; y < levelMap.length; y++) {
@@ -222,6 +218,21 @@
             cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
         }
 
+        function renderCoinCounter() {
+            const text = `Coins: ${coinsCollected}`;
+            const textWidth = ctx.measureText(text).width;
+            const x = (canvas.width - textWidth) / 2;
+            const y = 30;
+            cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
+        }
+
+        function render() {
+            cGL.clear();
+            renderBlocks();
+            renderMario();
+            renderCoinCounter();
+        }
+
         function loop(timestamp) {
             var elapsed = timestamp - lastTime;
             if (elapsed > frameInterval) {
@@ -235,7 +246,10 @@
         var lastTime = 0;
         var frameInterval = 1000 / 60;
         ctx.imageSmoothingEnabled = false;
-        requestAnimationFrame(loop);
+        font.load().then((loadedFont) => {
+            document.fonts.add(loadedFont);
+            requestAnimationFrame(loop);
+        });
     </script>
 </body>
 </html>
