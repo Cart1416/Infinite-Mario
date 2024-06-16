@@ -45,18 +45,15 @@
             `${assetsDirectory}/Mario_Small_Left_Walk_2.png`
         ];
 
-        // loading the images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
 
-        // position of objects in level
         const levelMap = [
             [0, 0, 0, 0, 0],
             [1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0],
         ];
-
-        // loading more images
+        
         const blockTextures = [];
         for (let i = 0; i < 2; i++) { // Assuming 2 block types (ground and bricks)
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
