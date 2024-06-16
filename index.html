@@ -70,8 +70,8 @@
         }
 
         let mario = {
-            x: canvas.width / 2,
-            y: canvas.height - 128,
+            x: 0,
+            y: canvas.height - 64 * 3,
             width: 32 * 2,
             height: 64 * 2,
             speed: 5,
@@ -83,7 +83,7 @@
             jumping: false,
             jumpSpeed: 0,
             gravity: 1,
-            groundLevel: canvas.height - 128 // Initial ground level
+            groundLevel: canvas.height - 128
         };
 
         function game() {
