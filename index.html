@@ -172,7 +172,7 @@
             }
 
             // Update ground level based on collisions
-            if (!mario.jumping) {
+            //if (!mario.jumping) {
                 mario.groundLevel = canvas.height - 128;
                 for (let y = 0; y < levelMap.length; y++) {
                     for (let x = 0; x < levelMap[y].length; x++) {
@@ -191,7 +191,7 @@
                         }
                     }
                 }
-            }
+            //}
         }
 
         function render() {
