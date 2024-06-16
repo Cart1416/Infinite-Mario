@@ -58,6 +58,8 @@
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ];
 
@@ -130,11 +132,15 @@
         }
 
         function handleCollisions(prevX, prevY) {
-            const blockSize = mario.width;
+            const blockSize = mario.width / 2;
             const marioTop = mario.y;
             const marioBottom = mario.y + mario.height;
             const marioLeft = mario.x;
             const marioRight = mario.x + mario.width;
+            const prevBottom = prevY + mario.height;
+            const prevTop = prevY;
+            const prevLeft = prevX;
+            const prevRight = prevX + mario.width;
 
             for (let y = 0; y < levelMap.length; y++) {
                 for (let x = 0; x < levelMap[y].length; x++) {
@@ -195,11 +201,11 @@
         }
 
         function renderBlocks() {
-            const blockSize = mario.width; // Adjusted size to match Mario's new width
+            const blockSize = mario.width / 2; // Adjusted size to match Mario's new width
             for (let y = 0; y < levelMap.length; y++) {
                 for (let x = 0; x < levelMap[y].length; x++) {
                     const blockType = levelMap[y][x];
-                    if (!(blockType === 0)) {
+                    if (blockType !== 0) {
                         const blockTexture = blockTextures[blockType];
                         const xPos = x * blockSize;
                         const yPos = y * blockSize;
@@ -212,7 +218,7 @@
         function renderMario() {
             let marioImageId;
             if (mario.jumping) {
-                marioImageId = mario.direction === 'right' ? `marioRight4` : `marioLeft4`;
+                marioImageId = mario.direction === 'right' ? 'marioRight4' : 'marioLeft4';
             } else {
                 marioImageId = mario.direction === 'right' ? `marioRight${mario.frame}` : `marioLeft${mario.frame}`;
             }
