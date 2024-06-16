@@ -132,7 +132,7 @@
         }
 
         function handleCollisions(prevX, prevY) {
-            const blockSize = mario.width / 2;
+            const blockSize = mario.width;
             const marioTop = mario.y;
             const marioBottom = mario.y + mario.height;
             const marioLeft = mario.x;
@@ -201,7 +201,7 @@
         }
 
         function renderBlocks() {
-            const blockSize = mario.width / 2; // Adjusted size to match Mario's new width
+            const blockSize = mario.width; // Adjusted size to match Mario's new width
             for (let y = 0; y < levelMap.length; y++) {
                 for (let x = 0; x < levelMap[y].length; x++) {
                     const blockType = levelMap[y][x];
