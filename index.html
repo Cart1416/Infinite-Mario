@@ -115,10 +115,8 @@
                 mario.jumpSpeed = -15; // Initial jump speed
             }
 
-            if (mario.jumping) {
-                mario.y += mario.jumpSpeed;
-                mario.jumpSpeed += mario.gravity;
-            }
+            mario.y += mario.jumpSpeed;
+            mario.jumpSpeed += mario.gravity;
 
             // Check for collisions
             handleCollisions(prevX, prevY);
@@ -172,7 +170,7 @@
             }
 
             // Update ground level based on collisions
-            //if (!mario.jumping) {
+            if (!mario.jumping) {
                 mario.groundLevel = canvas.height - 128;
                 for (let y = 0; y < levelMap.length; y++) {
                     for (let x = 0; x < levelMap[y].length; x++) {
@@ -191,7 +189,7 @@
                         }
                     }
                 }
-            //}
+            }
         }
 
         function render() {
