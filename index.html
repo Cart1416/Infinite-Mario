@@ -53,27 +53,27 @@
             [1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0],
         ];
-        
+
         const blockTextures = [];
-        for (let i = 0; i < 2; i++) { // Assuming 2 block types (ground and bricks)
+        for (let i = 0; i < 2; i++) {
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
         let mario = {
             x: canvas.width / 2,
-            y: canvas.height - 128, // Adjusted for larger size
-            width: 64,               // Doubled width
-            height: 128,             // Doubled height
+            y: canvas.height - 128,
+            width: 64,
+            height: 128,
             speed: 5,
             direction: 'right',
             frame: 0,
             frameCount: 4,
-            animationSpeed: 10,
+            animationSpeed: 15,
             frameTimer: 0
         };
 
         function game() {
-            if (cGL.keysDown[37]) { // Left arrow
+            if (cGL.keysDown[37]) {
                 mario.x -= mario.speed;
                 mario.direction = 'left';
                 mario.frameTimer++;
@@ -81,7 +81,7 @@
                     mario.frame = (mario.frame + 1) % mario.frameCount;
                     mario.frameTimer = 0;
                 }
-            } else if (cGL.keysDown[39]) { // Right arrow
+            } else if (cGL.keysDown[39]) {
                 mario.x += mario.speed;
                 mario.direction = 'right';
                 mario.frameTimer++;
@@ -90,10 +90,9 @@
                     mario.frameTimer = 0;
                 }
             } else {
-                mario.frame = 0; // reset to standing frame if no movement
+                mario.frame = 0;
             }
 
-            // Ensure Mario stays within the canvas boundaries
             if (mario.x < 0) {
                 mario.x = 0;
             } else if (mario.x + mario.width > canvas.width) {
@@ -102,7 +101,7 @@
         }
 
         function renderBlocks() {
-            const blockSize = mario.width; // Adjusted size to match Mario's new width
+            const blockSize = mario.width;
             for (let y = 0; y < levelMap.length; y++) {
                 for (let x = 0; x < levelMap[y].length; x++) {
                     const blockType = levelMap[y][x];
