@@ -76,7 +76,6 @@
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
-        cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
 
         let mario = {
             x: 0,
@@ -249,11 +248,12 @@
         function renderTitle() {
             cGL.drawImage("title", (canvas.width / 2) - (176 / 2), canvas.height / 4, 176, 143);
         }
-
+        
         function checkPlayButton() {
             if (cGL.buttons.playButton.pressed) {
                 renderingState = 2; // we will set this to 1 for level select later
-                cGL.removeButton("playButton");
+                cGL.removeButton("playButton")
+                cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
             }
         }
 
