@@ -139,12 +139,13 @@
         function handleCollisions(prevX, prevY) {
             const blockSize = mario.width;
             const hitboxHeight = mario.powerUp === 0 ? mario.height / 2 : mario.height;
-            const marioTop = mario.y;
-            const marioBottom = mario.y + hitboxHeight;
+            const hitboxOffset = mario.powerUp === 0 ? mario.height / 2 : 0;
+            const marioTop = mario.y + hitboxOffset;
+            const marioBottom = mario.y + hitboxOffset + hitboxHeight;
             const marioLeft = mario.x;
             const marioRight = mario.x + mario.width;
-            const prevBottom = prevY + hitboxHeight;
-            const prevTop = prevY;
+            const prevBottom = prevY + hitboxOffset + hitboxHeight;
+            const prevTop = prevY + hitboxOffset;
             const prevLeft = prevX;
             const prevRight = prevX + mario.width;
 
@@ -162,13 +163,13 @@
                         if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
                             // Collision from top
                             if (prevBottom <= blockTop && marioBottom > blockTop) {
-                                mario.y = blockTop - hitboxHeight;
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                                mario.y = blockBottom;
+                                mario.y = blockBottom - hitboxOffset;
                                 mario.jumpSpeed = 0;
                             }
                             // Collision from left
@@ -199,7 +200,7 @@
                             const blockRight = blockX + blockSize;
 
                             if (marioRight > blockLeft && marioLeft < blockRight && marioBottom >= blockTop && marioTop < blockBottom) {
-                                mario.groundLevel = blockTop - hitboxHeight;
+                                mario.groundLevel = blockTop - hitboxHeight - hitboxOffset;
                             }
                         }
                     }
