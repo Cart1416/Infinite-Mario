@@ -246,9 +246,9 @@
         cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!")
 
         function renderTitle() {
-            cGL.drawImage("title", (canvas.width / 2) - (176 / 2), canvas.height / 4, 176, 143);
+            cGL.drawImage("title", (canvas.width / 2) - (352 / 2), canvas.height / 4, 352, 143);
         }
-        
+
         function checkPlayButton() {
             if (cGL.buttons.playButton.pressed) {
                 renderingState = 2; // we will set this to 1 for level select later
