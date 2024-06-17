@@ -244,10 +244,10 @@
             cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
         }
 
-        cGL.addButton("playButton", canvas.width / 2, canvas.height / 4 * 3, 100, 20, true, "Play!")
+        cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!")
 
         function renderTitle() {
-            cGL.drawImage("title", canvas.width / 2, canvas.height / 4, 176, 143);
+            cGL.drawImage("title", (canvas.width / 2) - (176 / 2), canvas.height / 4, 176, 143);
         }
 
         function checkPlayButton() {
