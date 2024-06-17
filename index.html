@@ -131,7 +131,7 @@
                 mario.jumpTimer = 0;
             }
 
-            if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 60) { // Up arrow or space bar
+            if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 30) { // Up arrow or space bar
                 mario.jumping = true;
                 mario.jumpSpeed = -15;
                 ++mario.jumpTimer;
