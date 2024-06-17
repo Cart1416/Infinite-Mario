@@ -158,16 +158,19 @@
                         const blockRight = blockX + blockSize;
 
                         if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
-                            if (prevBottom <= blockTop) { // Collision from top
+                            // Vertical collision detection
+                            if (prevBottom <= blockTop && marioBottom > blockTop) { // Collision from top
                                 mario.y = blockTop - mario.height;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                            } else if (prevTop >= blockBottom) { // Collision from bottom
+                            } else if (prevTop >= blockBottom && marioTop < blockBottom) { // Collision from bottom
                                 mario.y = blockBottom;
                                 mario.jumpSpeed = 0;
-                            } else if (prevRight <= blockLeft) { // Collision from left
+                            }
+                            // Horizontal collision detection
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) { // Collision from left
                                 mario.x = blockLeft - mario.width;
-                            } else if (prevLeft >= blockRight) { // Collision from right
+                            } else if (prevLeft >= blockRight && marioLeft < blockRight) { // Collision from right
                                 mario.x = blockRight;
                             }
                         }
@@ -189,7 +192,7 @@
                             const blockLeft = blockX;
                             const blockRight = blockX + blockSize;
 
-                            if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            if (marioRight > blockLeft && marioLeft < blockRight && marioBottom >= blockTop && marioTop < blockBottom) {
                                 mario.groundLevel = blockTop - mario.height;
                             }
                         }
