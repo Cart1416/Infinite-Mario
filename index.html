@@ -121,12 +121,20 @@
                 mario.frame = 0;
             }
 
-            if ((cGL.keysDown[38] || cGL.keysDown[32]) && !mario.jumping) { // Up arrow or space bar
-                mario.jumping = true;
-                mario.jumpSpeed = -15;
+            if ((cGL.keysDown[38] || cGL.keysDown[32])) { // Up arrow or space bar
+                if (!mario.jumping) {
+                    mario.jumping = true;
+                    mario.jumpSpeed = -15;
+                }
                 ++mario.jumpTimer;
             } else {
                 mario.jumpTimer = 0;
+            }
+
+            if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 5) { // Up arrow or space bar
+                mario.jumping = true;
+                mario.jumpSpeed = -15;
+                ++mario.jumpTimer;
             }
 
             if (mario.jumpTimer == 1) {
