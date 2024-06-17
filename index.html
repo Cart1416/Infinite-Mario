@@ -78,7 +78,7 @@
             x: 0,
             y: 64 * 3,
             width: 32 * 2,
-            height: 64 * 1,
+            height: 64 * 2,
             speed: 5,
             direction: 'right',
             frame: 0,
@@ -88,7 +88,8 @@
             jumping: false,
             jumpSpeed: 0,
             gravity: 1,
-            groundLevel: canvas.height - 128
+            groundLevel: canvas.height - 128,
+            powerUp: 0
         };
         var coinsCollected = 0;
 
@@ -137,11 +138,12 @@
 
         function handleCollisions(prevX, prevY) {
             const blockSize = mario.width;
+            const hitboxHeight = mario.powerUp === 0 ? mario.height / 2 : mario.height;
             const marioTop = mario.y;
-            const marioBottom = mario.y + mario.height;
+            const marioBottom = mario.y + hitboxHeight;
             const marioLeft = mario.x;
             const marioRight = mario.x + mario.width;
-            const prevBottom = prevY + mario.height;
+            const prevBottom = prevY + hitboxHeight;
             const prevTop = prevY;
             const prevLeft = prevX;
             const prevRight = prevX + mario.width;
@@ -158,19 +160,23 @@
                         const blockRight = blockX + blockSize;
 
                         if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
-                            // Vertical collision detection
-                            if (prevBottom <= blockTop && marioBottom > blockTop) { // Collision from top
-                                mario.y = blockTop - mario.height;
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                            } else if (prevTop >= blockBottom && marioTop < blockBottom) { // Collision from bottom
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
                                 mario.y = blockBottom;
                                 mario.jumpSpeed = 0;
                             }
-                            // Horizontal collision detection
-                            else if (prevRight <= blockLeft && marioRight > blockLeft) { // Collision from left
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
                                 mario.x = blockLeft - mario.width;
-                            } else if (prevLeft >= blockRight && marioLeft < blockRight) { // Collision from right
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
                                 mario.x = blockRight;
                             }
                         }
@@ -193,7 +199,7 @@
                             const blockRight = blockX + blockSize;
 
                             if (marioRight > blockLeft && marioLeft < blockRight && marioBottom >= blockTop && marioTop < blockBottom) {
-                                mario.groundLevel = blockTop - mario.height;
+                                mario.groundLevel = blockTop - hitboxHeight;
                             }
                         }
                     }
