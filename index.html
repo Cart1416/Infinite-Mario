@@ -253,6 +253,7 @@
         function checkPlayButton() {
             if (cGL.buttons.playButton.pressed) {
                 renderingState = 2; // we will set this to 1 for level select later
+                cGL.removeButton("playButton");
             }
         }
 
