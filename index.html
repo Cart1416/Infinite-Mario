@@ -90,6 +90,7 @@
             frameTimer: 0,
             jumping: false,
             jumpSpeed: 0,
+            jumpTimer: 0,
             gravity: 1,
             groundLevel: canvas.height - 128,
             powerUp: 0
@@ -117,12 +118,19 @@
                     mario.frameTimer = 0;
                 }
             } else {
-                mario.frame = 0; // reset to standing frame if no movement
+                mario.frame = 0;
             }
 
             if ((cGL.keysDown[38] || cGL.keysDown[32]) && !mario.jumping) { // Up arrow or space bar
                 mario.jumping = true;
-                mario.jumpSpeed = -15; // Initial jump speed
+                mario.jumpSpeed = -15;
+                ++mario.jumpTimer;
+            } else {
+                mario.jumpTimer = 0;
+            }
+
+            if (mario.jumpTimer == 1) {
+                cGL.playSound(`${assetsDirectory}/sounds/jump.mp3`);
             }
 
             mario.y += mario.jumpSpeed;
