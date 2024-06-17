@@ -74,7 +74,7 @@
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
-        cGL.startBackgroundMusic(backgroundMusic);
+        cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
 
         let mario = {
             x: 0,
