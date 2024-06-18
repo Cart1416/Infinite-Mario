@@ -51,6 +51,7 @@
         // Load all images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
+        blockTypes = 4;
 
         // Define your level map
         const levelMap = [
@@ -73,7 +74,8 @@
 
         // Load block textures
         const blockTextures = [];
-        for (let i = 0; i < 3; i++) { // Assuming 3 block types (air, ground, bricks)
+        blockTypesButCorrect = blockTypes + 1;
+        for (let i = 0; i < blockTypesButCorrect; i++) {
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
