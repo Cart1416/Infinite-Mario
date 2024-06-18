@@ -317,6 +317,8 @@
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
                                 levelMap[y][x] = 3;
                                 ++coinsCollected;
                                 cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
