@@ -69,7 +69,7 @@
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ];
         var backgroundMusic = "ground_music.mp3";
-        var backgroundColor = "9494ff";
+        var backgroundColor = "#9494ff";
 
         // Load block textures
         const blockTextures = [];
@@ -291,7 +291,9 @@
         function loop(timestamp) {
             var elapsed = timestamp - lastTime;
             if (elapsed > frameInterval) {
-                game();
+                if (renderingState == 2) {
+                    game();
+                }
                 render();
                 cGL.renderButtons();
                 cGL.loop();
