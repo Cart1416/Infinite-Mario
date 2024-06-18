@@ -277,21 +277,25 @@
                             if (prevBottom <= blockTop && marioBottom > blockTop) {
                                 levelMap[y][x] = 0;
                                 ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
                                 levelMap[y][x] = 0;
                                 ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
                             }
                             // Collision from left
                             else if (prevRight <= blockLeft && marioRight > blockLeft) {
                                 levelMap[y][x] = 0;
                                 ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
                             }
                             // Collision from right
                             else if (prevLeft >= blockRight && marioLeft < blockRight) {
                                 levelMap[y][x] = 0;
                                 ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
                             }
                         }
                     }
