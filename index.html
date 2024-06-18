@@ -51,7 +51,7 @@
         // Load all images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
-        blockTypes = 4;
+        blockTypes = 8;
 
         // Define your level map
         var levelMap = [
@@ -74,8 +74,7 @@
 
         // Load block textures
         const blockTextures = [];
-        blockTypesButCorrect = blockTypes + 1;
-        for (let i = 0; i < blockTypesButCorrect; i++) {
+        for (let i = 0; i < blockTypes; i++) {
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
@@ -221,8 +220,10 @@
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                                mario.y = blockBottom - hitboxOffset;
-                                mario.jumpSpeed = 0;
+                                if (mario.powerUp > 0) {
+                                    levelMap[y][x] = 0;
+                                    cGL.playSound(`${assetsDirectory}/sounds/brick_break.mp3`);
+                                }
                             }
                             // Collision from left
                             else if (prevRight <= blockLeft && marioRight > blockLeft) {
@@ -296,6 +297,37 @@
                                 levelMap[y][x] = 0;
                                 ++coinsCollected;
                                 cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                        }
+                    }
+                    if (blockType == 5) { //question block with a coin
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                levelMap[y][x] = 3;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
                             }
                         }
                     }
