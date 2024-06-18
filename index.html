@@ -54,7 +54,7 @@
         blockTypes = 4;
 
         // Define your level map
-        const levelMap = [
+        var levelMap = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
@@ -174,7 +174,7 @@
             for (let y = 0; y < levelMap.length; y++) {
                 for (let x = 0; x < levelMap[y].length; x++) {
                     const blockType = levelMap[y][x];
-                    if (blockType !== 0) {
+                    if (blockType == 1) { //ground
                         const blockX = x * blockSize;
                         const blockY = y * blockSize;
                         const blockTop = blockY;
@@ -201,6 +201,97 @@
                             // Collision from right
                             else if (prevLeft >= blockRight && marioLeft < blockRight) {
                                 mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 2) { //brick
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 3) { //question block
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 4) { //coin
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
                             }
                         }
                     }
