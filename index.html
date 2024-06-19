@@ -90,6 +90,7 @@
 
         var gamePadAvailable = false;
         var gamePadPressed = false;
+        var keyboardPressed = false;
         window.addEventListener("gamepadconnected", (e) => {
             gamePadAvailable = true;
         });
@@ -278,7 +279,7 @@
             mario.prevX = prevX;
             mario.prevY = prevY;
             const gamePads = navigator.getGamepads();
-            if (gamePadAvailable) {
+            if (gamePadAvailable && !keyboardPressed) {
                 if (userAgent.indexOf("Chrome") > -1 || userAgent.indexOf("Chromium") > -1) {
                     for (let i = 0; i < gamePads.length; i++) {
                         if (gamePads[i].buttons[14].pressed) { // Left arrow
@@ -362,6 +363,7 @@
                         mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
                         mario.frameTimer = 0;
                     }
+                    keyboardPressed = true;
                 } else if (cGL.keysDown[39]) { // Right arrow
                     mario.x += mario.speed;
                     mario.direction = 'right';
@@ -370,8 +372,10 @@
                         mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
                         mario.frameTimer = 0;
                     }
+                    keyboardPressed = true;
                 } else {
                     mario.frame = 0;
+                    keyboardPressed = false;
                 }
 
                 if ((cGL.keysDown[38] || cGL.keysDown[32])) { // Up arrow or space bar
@@ -380,6 +384,7 @@
                         mario.jumpSpeed = -15;
                     }
                     ++mario.jumpTimer;
+                    keyboardPressed = true;
                 } else {
                     mario.jumpTimer = 0;
                 }
@@ -388,6 +393,7 @@
                     mario.jumping = true;
                     mario.jumpSpeed = -15;
                     ++mario.jumpTimer;
+                    keyboardPressed = true;
                 }
             }
 
