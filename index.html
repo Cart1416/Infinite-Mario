@@ -89,6 +89,7 @@
         var spawnPoint = {x: 64, y: 64 * 3}
 
         var gamePadAvailable = false;
+        var gamePadPressed = false;
         window.addEventListener("gamepadconnected", (e) => {
             gamePadAvailable = true;
         });
@@ -324,41 +325,42 @@
                     }
                 }
             }
-
-            if (cGL.keysDown[37]) { // Left arrow
-                mario.x -= mario.speed;
-                mario.direction = 'left';
-                mario.frameTimer++;
-                if (mario.frameTimer >= mario.animationSpeed) {
-                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                    mario.frameTimer = 0;
+            if (!gamePadPressed) {
+                if (cGL.keysDown[37]) { // Left arrow
+                    mario.x -= mario.speed;
+                    mario.direction = 'left';
+                    mario.frameTimer++;
+                    if (mario.frameTimer >= mario.animationSpeed) {
+                        mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                        mario.frameTimer = 0;
+                    }
+                } else if (cGL.keysDown[39]) { // Right arrow
+                    mario.x += mario.speed;
+                    mario.direction = 'right';
+                    mario.frameTimer++;
+                    if (mario.frameTimer >= mario.animationSpeed) {
+                        mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                        mario.frameTimer = 0;
+                    }
+                } else {
+                    mario.frame = 0;
                 }
-            } else if (cGL.keysDown[39]) { // Right arrow
-                mario.x += mario.speed;
-                mario.direction = 'right';
-                mario.frameTimer++;
-                if (mario.frameTimer >= mario.animationSpeed) {
-                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                    mario.frameTimer = 0;
-                }
-            } else {
-                mario.frame = 0;
-            }
 
-            if ((cGL.keysDown[38] || cGL.keysDown[32])) { // Up arrow or space bar
-                if (!mario.jumping) {
+                if ((cGL.keysDown[38] || cGL.keysDown[32])) { // Up arrow or space bar
+                    if (!mario.jumping) {
+                        mario.jumping = true;
+                        mario.jumpSpeed = -15;
+                    }
+                    ++mario.jumpTimer;
+                } else {
+                    mario.jumpTimer = 0;
+                }
+
+                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 8) { // Up arrow or space bar
                     mario.jumping = true;
                     mario.jumpSpeed = -15;
+                    ++mario.jumpTimer;
                 }
-                ++mario.jumpTimer;
-            } else {
-                mario.jumpTimer = 0;
-            }
-
-            if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 8) { // Up arrow or space bar
-                mario.jumping = true;
-                mario.jumpSpeed = -15;
-                ++mario.jumpTimer;
             }
 
             if (mario.jumpTimer == 1) {
