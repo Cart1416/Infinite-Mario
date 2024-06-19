@@ -45,12 +45,28 @@
             `${assetsDirectory}/Mario_Small_Left_Walk_2.png`,
             `${assetsDirectory}/Mario_Small_Left_Jumping.png`
         ];
+        const marioBigRightImgs = [
+            `${assetsDirectory}/Mario_Big.png`,
+            `${assetsDirectory}/Mario_Big_Walk_0.png`,
+            `${assetsDirectory}/Mario_Big_Walk_1.png`,
+            `${assetsDirectory}/Mario_Big_Walk_2.png`,
+            `${assetsDirectory}/Mario_Big_Jumping.png`
+        ];
+        const marioBigLeftImgs = [
+            `${assetsDirectory}/Mario_Big_Left.png`,
+            `${assetsDirectory}/Mario_Big_Left_Walk_0.png`,
+            `${assetsDirectory}/Mario_Big_Left_Walk_1.png`,
+            `${assetsDirectory}/Mario_Big_Left_Walk_2.png`,
+            `${assetsDirectory}/Mario_Big_Left_Jumping.png`
+        ];
         var renderingState = 0;
         cGL.loadImage("title", `${assetsDirectory}/Title.png`);
 
         // Load all images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
+        marioBigRightImgs.forEach((img, index) => cGL.loadImage(`marioBigRight${index}`, img));
+        marioBigLeftImgs.forEach((img, index) => cGL.loadImage(`marioBigLeft${index}`, img));
         blockTypes = 9;
 
         // Define your level map
@@ -479,10 +495,18 @@
 
         function renderMario() {
             let marioImageId;
-            if (mario.jumping) {
-                marioImageId = mario.direction === 'right' ? 'marioRight4' : 'marioLeft4';
-            } else {
-                marioImageId = mario.direction === 'right' ? `marioRight${mario.frame}` : `marioLeft${mario.frame}`;
+            if (mario.powerUp == 0) {
+                if (mario.jumping) {
+                    marioImageId = mario.direction === 'right' ? 'marioRight4' : 'marioLeft4';
+                } else {
+                    marioImageId = mario.direction === 'right' ? `marioRight${mario.frame}` : `marioLeft${mario.frame}`;
+                }
+            } else if (mario.powerUp == 1) {
+                if (mario.jumping) {
+                    marioImageId = mario.direction === 'right' ? 'marioBigRight4' : 'marioBigLeft4';
+                } else {
+                    marioImageId = mario.direction === 'right' ? `marioBigRight${mario.frame}` : `marioBigLeft${mario.frame}`;
+                }
             }
             cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
         }
