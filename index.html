@@ -86,6 +86,7 @@
         ];
         var backgroundMusic = "ground_music.mp3";
         var backgroundColor = "#9494ff";
+        var spawnPoint = {x: 64, y: 64 * 3}
 
         // Load block textures
         const blockTextures = [];
@@ -116,6 +117,8 @@
             groundLevel: canvas.height - 128,
             powerUp: 0
         };
+        mario.x = spawnPoint.x;
+        mario.y = spawnPoint.y;
         var coinsCollected = 0;
 
         var entities = [];
@@ -564,6 +567,44 @@
 
                         levelMap[y][x] = 0;
                         addGoomba(x * blockSize, y * blockSize);
+                    }
+                }
+            }
+
+            for (let i = 0; i < entities.length; i++) {
+                const entityType = entities[i].id;
+                if (entityType == 1) { //goomba
+                    const blockX = entities[i].x;
+                    const blockY = entities[i].y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + entities[i].height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + entities[i].width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            entities.splice(i, 1);
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                        }
+                        // Collision from bottom
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
                     }
                 }
             }
