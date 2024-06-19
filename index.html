@@ -220,6 +220,8 @@
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
                                 if (mario.powerUp > 0) {
                                     levelMap[y][x] = 0;
                                     cGL.playSound(`${assetsDirectory}/sounds/brick_break.mp3`);
@@ -320,6 +322,107 @@
                                 mario.y = blockBottom - hitboxOffset;
                                 mario.jumpSpeed = 0;
                                 levelMap[y][x] = 3;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 6) { //question block with a mushroom
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                                levelMap[y][x] = 3;
+                                above = y + 1;
+                                levelMap[above][x] = 7;
+                                cGL.playSound(`${assetsDirectory}/sounds/powerUpAppear.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 7) { //non moving mushroom
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                        }
+                    }
+                    if (blockType == 8) { //question block with infinite coins
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
                                 ++coinsCollected;
                                 cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
                             }
