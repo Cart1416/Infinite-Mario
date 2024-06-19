@@ -355,7 +355,7 @@
                                 mario.y = blockBottom - hitboxOffset;
                                 mario.jumpSpeed = 0;
                                 levelMap[y][x] = 3;
-                                above = y + 1;
+                                above = y - 1;
                                 levelMap[above][x] = 7;
                                 cGL.playSound(`${assetsDirectory}/sounds/powerUpAppear.mp3`);
                             }
