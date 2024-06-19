@@ -113,92 +113,94 @@
         };
         var coinsCollected = 0;
 
-        const goombaTemplate = {
-            id: 1,
-            x: 0,
-            y: 0,
-            width: mario.width,
-            height: mario.width,
-            speed: 2,
-            frame: 0,
-            frameCount: 2,
-            animationSpeed: 30,
-            frameTimer: 0,
-            direction: 'right',
-            update: function() {
-                let prevX = self.x;
-                let prevY = self.y;
-                if (self.direction == 'left') {
-                    self.x -= self.speed;
-                }
-                if (self.direction == 'right') {
-                    self.x += self.speed;
-                }
-                self.frameTimer++;
-                if (self.frameTimer >= self.animationSpeed) {
-                    if (self.frame >= frameCount) {
-                        self.frame = 0;
-                    } else {
-                        ++self.frame
-                    }
-                    self.frameTimer = 0;
-                }
-                const blockSize = self.width;
-                const hitboxHeight = self.height;
-                const hitboxOffset = self.height;
-                const marioTop = self.y + hitboxOffset;
-                const marioBottom = self.y + hitboxOffset + hitboxHeight;
-                const marioLeft = self.x;
-                const marioRight = self.x + self.width;
-                const prevBottom = prevY + hitboxOffset + hitboxHeight;
-                const prevTop = prevY + hitboxOffset;
-                const prevLeft = prevX;
-                const prevRight = prevX + self.width;
-                for (let y = 0; y < levelMap.length; y++) {
-                    for (let x = 0; x < levelMap[y].length; x++) {
-                        const blockType = levelMap[y][x];
-                        if (blockType != 0 && blockType != 4 && blockType != 7 && blockType != 9) {
-                            const blockX = x * blockSize;
-                            const blockY = y * blockSize;
-                            const blockTop = blockY;
-                            const blockBottom = blockY + blockSize;
-                            const blockLeft = blockX;
-                            const blockRight = blockX + blockSize;
+        var entities = [];
 
-                            if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
-                                // Collision from top
-                                if (prevBottom <= blockTop && marioBottom > blockTop) {
-                                    self.y = blockTop - hitboxHeight - hitboxOffset;
-                                }
-                                // Collision from bottom
-                                else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                                    self.y = blockBottom - hitboxOffset;
-                                }
-                                // Collision from left
-                                else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                                    self.x = blockLeft - self.width;
-                                    self.direction = 'left';
-                                }
-                                // Collision from right
-                                else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                                    self.x = blockRight;
-                                    self.direction = 'right';
+        function addGoomba() {
+            var goombaTemplate = {
+                id: 1,
+                x: 0,
+                y: 0,
+                width: mario.width,
+                height: mario.width,
+                speed: 2,
+                frame: 0,
+                frameCount: 2,
+                animationSpeed: 30,
+                frameTimer: 0,
+                direction: 'right',
+                update: function() {
+                    let prevX = self.x;
+                    let prevY = self.y;
+                    if (self.direction == 'left') {
+                        self.x -= self.speed;
+                    }
+                    if (self.direction == 'right') {
+                        self.x += self.speed;
+                    }
+                    self.frameTimer++;
+                    if (self.frameTimer >= self.animationSpeed) {
+                        if (self.frame >= frameCount) {
+                            self.frame = 0;
+                        } else {
+                            ++self.frame
+                        }
+                        self.frameTimer = 0;
+                    }
+                    const blockSize = self.width;
+                    const hitboxHeight = self.height;
+                    const hitboxOffset = self.height;
+                    const marioTop = self.y + hitboxOffset;
+                    const marioBottom = self.y + hitboxOffset + hitboxHeight;
+                    const marioLeft = self.x;
+                    const marioRight = self.x + self.width;
+                    const prevBottom = prevY + hitboxOffset + hitboxHeight;
+                    const prevTop = prevY + hitboxOffset;
+                    const prevLeft = prevX;
+                    const prevRight = prevX + self.width;
+                    for (let y = 0; y < levelMap.length; y++) {
+                        for (let x = 0; x < levelMap[y].length; x++) {
+                            const blockType = levelMap[y][x];
+                            if (blockType != 0 && blockType != 4 && blockType != 7 && blockType != 9) {
+                                const blockX = x * blockSize;
+                                const blockY = y * blockSize;
+                                const blockTop = blockY;
+                                const blockBottom = blockY + blockSize;
+                                const blockLeft = blockX;
+                                const blockRight = blockX + blockSize;
+
+                                if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                                    // Collision from top
+                                    if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                        self.y = blockTop - hitboxHeight - hitboxOffset;
+                                    }
+                                    // Collision from bottom
+                                    else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                        self.y = blockBottom - hitboxOffset;
+                                    }
+                                    // Collision from left
+                                    else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                        self.x = blockLeft - self.width;
+                                        self.direction = 'left';
+                                    }
+                                    // Collision from right
+                                    else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                        self.x = blockRight;
+                                        self.direction = 'right';
+                                    }
                                 }
                             }
                         }
                     }
+                },
+                render: function() {
+                    if (self.frame == 0) {
+                        cGL.drawImage("Goomba", self.x, self.y, self.width, self.height);
+                    } else if (self.frame == 1) {
+                        cGL.drawImage("Goomba1", self.x, self.y, self.width, self.height);
+                    }
                 }
-            },
-            render: function() {
-                if (self.frame == 0) {
-                    cGL.drawImage("Goomba", self.x, self.y, self.width, self.height);
-                } else if (self.frame == 1) {
-                    cGL.drawImage("Goomba1", self.x, self.y, self.width, self.height);
-                }
-            }
-        };
-
-        var entities = [];
+            };
+        }
 
         function game() {
             for (let i = 0; i < entities.length; i++) {
