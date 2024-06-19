@@ -96,10 +96,7 @@
 
         var camera = {
             x: 0,
-            y: 0,
-            width: canvas.width,
-            height: canvas.height,
-            margin: 100
+            y: 0
         };
 
         var mario = {
@@ -317,6 +314,16 @@
                 camera.y -= 5;
             } else if (cGL.keysDown[76]) { // L
                 camera.x -= 5;
+            }
+
+            const screenEdgeBuffer = 100;
+            const screenRightEdge = canvas.width - screenEdgeBuffer;
+            const screenLeftEdge = screenEdgeBuffer;
+
+            if (mario.x > screenRightEdge) { //right
+                camera.x += mario.x - screenRightEdge;
+            } else if (mario.x < screenLeftEdge) { //left
+                camera.x -= screenLeftEdge - mario.x;
             }
         }
 
@@ -676,32 +683,6 @@
             }
         }
 
-        function updateCamera() {
-            const leftBoundary = camera.x + camera.margin;
-            const rightBoundary = camera.x + camera.width - camera.margin;
-            const topBoundary = camera.y + camera.margin;
-            const bottomBoundary = camera.y + camera.height - camera.margin;
-
-            // horizontal
-            /*
-            if ((mario.x - camera.x) < camera.margin && mario.direction === 'left') {
-                camera.x += 10;
-            } else if (!((mario.x - camera.x) < (camera.width - camera.margin) && mario.direction === 'right')) {
-                camera.x -= 10;
-            }
-            */
-
-            // vertical
-            if (mario.y < topBoundary) {
-                camera.y = mario.y - camera.margin;
-            } else if (mario.y + mario.height > bottomBoundary) {
-                camera.y = mario.y + mario.height - camera.height + camera.margin;
-            }
-
-            camera.x = Math.max(0, Math.min(camera.x, levelMap[0].length * mario.width - camera.width));
-            camera.y = Math.max(0, Math.min(camera.y, levelMap.length * mario.width - camera.height));
-        }
-
         function renderBlocks() {
             const blockSize = mario.width;
             for (let y = 0; y < levelMap.length; y++) {
@@ -782,7 +763,6 @@
             if (elapsed > frameInterval) {
                 if (renderingState == 2) {
                     game();
-                    updateCamera();
                 }
                 render();
                 cGL.renderButtons();
