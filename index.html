@@ -320,10 +320,10 @@
             const screenRightEdge = canvas.width - screenEdgeBuffer;
             const screenLeftEdge = screenEdgeBuffer;
 
-            if (mario.x > screenRightEdge) { //right
-                camera.x += mario.x - screenRightEdge;
-            } else if (mario.x < screenLeftEdge) { //left
-                camera.x -= screenLeftEdge - mario.x;
+            if (mario.x - camera.x > screenRightEdge) { //right
+                camera.x += (mario.x - camera.x) - screenRightEdge;
+            } else if (mario.x - camera.x < screenLeftEdge) { //left
+                camera.x -= screenLeftEdge - (mario.x - camera.x);
             }
         }
 
