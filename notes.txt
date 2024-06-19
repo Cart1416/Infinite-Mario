@@ -9,5 +9,5 @@ blocks:
 7: mushroom (not moving)
 8: question block (infinite coins)
 
-mushroom mostly coded but can't move
+mushroom mostly coded but the object can't move
 entities coming soon
