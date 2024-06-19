@@ -316,36 +316,7 @@
                 camera.x -= 5;
             }
 
-            const screenCenterX = canvas.width / 2;
-            const screenCenterY = canvas.height / 2;
 
-            // Define the margins from the screen edges where the camera starts scrolling
-            const scrollMarginX = canvas.width * 0.3; // 30% of the screen width
-            const scrollMarginY = canvas.height * 0.3; // 30% of the screen height
-
-            // Define the maximum and minimum values for the camera's position
-            const maxX = levelMap[0].length * mario.width - canvas.width;
-            const maxY = levelMap.length * mario.width - canvas.height;
-            const minX = 0;
-            const minY = 0;
-
-            // Calculate the horizontal camera position
-            if (mario.x - camera.x < scrollMarginX) {
-                // Mario is too close to the left edge, scroll left
-                camera.x = Math.max(minX, mario.x - scrollMarginX);
-            } else if (camera.x + canvas.width - mario.x < scrollMarginX) {
-                // Mario is too close to the right edge, scroll right
-                camera.x = Math.min(maxX, mario.x + scrollMarginX - canvas.width);
-            }
-
-            // Calculate the vertical camera position
-            if (mario.y - camera.y < scrollMarginY) {
-                // Mario is too close to the top edge, scroll up
-                camera.y = Math.max(minY, mario.y - scrollMarginY);
-            } else if (camera.y + canvas.height - mario.y < scrollMarginY) {
-                // Mario is too close to the bottom edge, scroll down
-                camera.y = Math.min(maxY, mario.y + scrollMarginY - canvas.height);
-            }
         }
 
         function handleCollisions(prevX, prevY) {
