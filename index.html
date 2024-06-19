@@ -684,9 +684,9 @@
 
             // horizontal
             if ((mario.x - camera.x) < camera.margin && mario.direction === 'left') {
-                camera.x -= 10;
-            } else if ((mario.x - camera.x) > (canvas.width - camera.margin) && mario.direction === 'right') {
                 camera.x += 10;
+            } else if ((mario.x - camera.x) > (canvas.width - camera.margin) && mario.direction === 'right') {
+                camera.x -= 10;
             }
 
             // vertical
