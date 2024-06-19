@@ -351,6 +351,12 @@
                             mario.jumpTimer = 0;
                             gamePadPressed = false;
                         }
+                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                            ++mario.jumpTimer;
+                            keyboardPressed = true;
+                        }
                     }
                 }
             }
