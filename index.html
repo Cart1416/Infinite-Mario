@@ -93,6 +93,11 @@
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
+        var camera = {
+            x: 0,
+            y: 0
+        };
+
         var mario = {
             x: 0,
             y: 64 * 3,
@@ -196,9 +201,9 @@
                 },
                 render: function() {
                     if (this.frame == 0) {
-                        cGL.drawImage("Goomba", this.x, this.y, this.width, this.height);
+                        cGL.drawImage("Goomba", this.x + camera.x, this.y + camera.y, this.width, this.height);
                     } else if (this.frame == 1) {
-                        cGL.drawImage("Goomba1", this.x, this.y, this.width, this.height);
+                        cGL.drawImage("Goomba1", this.x + camera.x, this.y + camera.y, this.width, this.height);
                     }
                 }
             };
@@ -263,6 +268,17 @@
                 mario.x = 0;
             } else if (mario.x + mario.width > canvas.width) {
                 mario.x = canvas.width - mario.width;
+            }
+
+            //camera controls
+            if (cGL.keysDown[73]) { // I
+                ++camera.y;
+            } else if (cGL.keysDown[74]) { // J
+                --camera.x;
+            } else if (cGL.keysDown[75]) { // K
+                --camera.y;
+            } else if (cGL.keysDown[76]) { // L
+                ++camera.x;
             }
         }
 
@@ -589,8 +605,8 @@
                     const blockType = levelMap[y][x];
                     if (blockType !== 0) {
                         const blockTexture = blockTextures[blockType];
-                        const xPos = x * blockSize;
-                        const yPos = y * blockSize;
+                        const xPos = (x * blockSize) + camera.x;
+                        const yPos = (y * blockSize) + camera.y;
                         cGL.drawImage(`block${blockType}`, xPos, yPos, blockSize, blockSize);
                     }
                 }
@@ -612,7 +628,7 @@
                     marioImageId = mario.direction === 'right' ? `marioBigRight${mario.frame}` : `marioBigLeft${mario.frame}`;
                 }
             }
-            cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
+            cGL.drawImage(marioImageId, mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
         }
 
         function renderEntities() {
