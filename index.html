@@ -189,6 +189,9 @@
         var entities = [];
 
         function game() {
+            for (let i = 0; i < entities.length; i++) {
+                entities[i].update();
+            }
             let prevX = mario.x;
             let prevY = mario.y;
 
@@ -582,6 +585,13 @@
                 }
             }
             cGL.drawImage(marioImageId, mario.x, mario.y, mario.width, mario.height);
+        }
+
+        function renderEntities() {
+            for (let i = 0; i < entities.length; i++) {
+                //entities[i].update();
+                console.log("add goomba rendering!!")
+            }
         }
 
         function renderCoinCounter() {
