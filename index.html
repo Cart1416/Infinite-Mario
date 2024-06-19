@@ -129,34 +129,34 @@
                 frameTimer: 0,
                 direction: 'right',
                 update: function() {
-                    let prevX = self.x;
-                    let prevY = self.y;
-                    if (self.direction == 'left') {
-                        self.x -= self.speed;
+                    let prevX = this.x;
+                    let prevY = this.y;
+                    if (this.direction == 'left') {
+                        this.x -= this.speed;
                     }
-                    if (self.direction == 'right') {
-                        self.x += self.speed;
+                    if (this.direction == 'right') {
+                        this.x += this.speed;
                     }
-                    self.frameTimer++;
-                    if (self.frameTimer >= self.animationSpeed) {
-                        if (self.frame >= frameCount) {
-                            self.frame = 0;
+                    this.frameTimer++;
+                    if (this.frameTimer >= this.animationSpeed) {
+                        if (this.frame >= this.frameCount) {
+                            this.frame = 0;
                         } else {
-                            ++self.frame
+                            ++this.frame;
                         }
-                        self.frameTimer = 0;
+                        this.frameTimer = 0;
                     }
-                    const blockSize = self.width;
-                    const hitboxHeight = self.height;
-                    const hitboxOffset = self.height;
-                    const marioTop = self.y + hitboxOffset;
-                    const marioBottom = self.y + hitboxOffset + hitboxHeight;
-                    const marioLeft = self.x;
-                    const marioRight = self.x + self.width;
+                    const blockSize = this.width;
+                    const hitboxHeight = this.height;
+                    const hitboxOffset = this.height;
+                    const marioTop = this.y + hitboxOffset;
+                    const marioBottom = this.y + hitboxOffset + hitboxHeight;
+                    const marioLeft = this.x;
+                    const marioRight = this.x + this.width;
                     const prevBottom = prevY + hitboxOffset + hitboxHeight;
                     const prevTop = prevY + hitboxOffset;
                     const prevLeft = prevX;
-                    const prevRight = prevX + self.width;
+                    const prevRight = prevX + this.width;
                     for (let y = 0; y < levelMap.length; y++) {
                         for (let x = 0; x < levelMap[y].length; x++) {
                             const blockType = levelMap[y][x];
@@ -171,21 +171,21 @@
                                 if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
                                     // Collision from top
                                     if (prevBottom <= blockTop && marioBottom > blockTop) {
-                                        self.y = blockTop - hitboxHeight - hitboxOffset;
+                                        this.y = blockTop - hitboxHeight - hitboxOffset;
                                     }
                                     // Collision from bottom
                                     else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                                        self.y = blockBottom - hitboxOffset;
+                                        this.y = blockBottom - hitboxOffset;
                                     }
                                     // Collision from left
                                     else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                                        self.x = blockLeft - self.width;
-                                        self.direction = 'left';
+                                        this.x = blockLeft - this.width;
+                                        this.direction = 'left';
                                     }
                                     // Collision from right
                                     else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                                        self.x = blockRight;
-                                        self.direction = 'right';
+                                        this.x = blockRight;
+                                        this.direction = 'right';
                                     }
                                 }
                             }
@@ -193,10 +193,10 @@
                     }
                 },
                 render: function() {
-                    if (self.frame == 0) {
-                        cGL.drawImage("Goomba", self.x, self.y, self.width, self.height);
-                    } else if (self.frame == 1) {
-                        cGL.drawImage("Goomba1", self.x, self.y, self.width, self.height);
+                    if (this.frame == 0) {
+                        cGL.drawImage("Goomba", this.x, this.y, this.width, this.height);
+                    } else if (this.frame == 1) {
+                        cGL.drawImage("Goomba1", this.x, this.y, this.width, this.height);
                     }
                 }
             };
