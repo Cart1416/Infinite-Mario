@@ -127,6 +127,7 @@
                 frameCount: 1,
                 animationSpeed: 30,
                 frameTimer: 0,
+                gravity: 1,
                 direction: 'left',
                 update: function() {
                     let prevX = this.x;
@@ -146,6 +147,7 @@
                         }
                         this.frameTimer = 0;
                     }
+                    this.y += this.gravity;
                     const blockSize = this.width;
                     const hitboxHeight = this.height;
                     const hitboxOffset = this.height;
@@ -160,7 +162,7 @@
                     for (let y = 0; y < levelMap.length; y++) {
                         for (let x = 0; x < levelMap[y].length; x++) {
                             const blockType = levelMap[y][x];
-                            if (blockType != 0 && blockType != 4 && blockType != 7 && blockType != 9) {
+                            if ((blockType != 0) && (blockType != 4) && (blockType != 7) && (blockType != 9)) {
                                 const blockX = x * blockSize;
                                 const blockY = y * blockSize;
                                 const blockTop = blockY;
