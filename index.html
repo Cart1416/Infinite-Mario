@@ -60,12 +60,13 @@
         var renderingState = 0;
         cGL.loadImage("title", `${assetsDirectory}/Title.png`);
 
-        // Load all images
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
         marioBigRightImgs.forEach((img, index) => cGL.loadImage(`marioBigRight${index}`, img));
         marioBigLeftImgs.forEach((img, index) => cGL.loadImage(`marioBigLeft${index}`, img));
         blockTypes = 9;
+        cGL.loadImage("Goomba", `${assetsDirectory}/entities/Goomba.png`);
+        cGL.loadImage("Goomba1", `${assetsDirectory}/entities/Goomba1.png`);
 
         // Define your level map
         var levelMap = [
@@ -174,14 +175,23 @@
                                 // Collision from left
                                 else if (prevRight <= blockLeft && marioRight > blockLeft) {
                                     self.x = blockLeft - self.width;
+                                    self.direction = 'left';
                                 }
                                 // Collision from right
                                 else if (prevLeft >= blockRight && marioLeft < blockRight) {
                                     self.x = blockRight;
+                                    self.direction = 'right';
                                 }
                             }
                         }
                     }
+                }
+            },
+            render: function() {
+                if (frame == 0) {
+                    cGL.drawImage("Goomba", self.x, self.y, self.width, self.height);
+                } else if (frame == 1) {
+                    cGL.drawImage("Goomba1", self.x, self.y, self.width, self.height);
                 }
             }
         };
@@ -589,8 +599,7 @@
 
         function renderEntities() {
             for (let i = 0; i < entities.length; i++) {
-                //entities[i].update();
-                console.log("add goomba rendering!!")
+                entities[i].render();
             }
         }
 
@@ -620,6 +629,7 @@
             if (renderingState == 2) {
                 cGL.drawBackground(backgroundColor);
                 renderBlocks();
+                renderEntities()
                 renderMario();
                 renderCoinCounter();
             } else if (renderingState == 0) {
