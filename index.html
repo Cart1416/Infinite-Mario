@@ -327,16 +327,16 @@
 
             // Adjust the camera's x position based on Mario's position
             if (mario.x < camera.x + cameraBounds.left) {
-                camera.x = mario.x - cameraBounds.left;
-            } else if (mario.x + mario.width > camera.x + cameraBounds.right) {
                 camera.x = mario.x + mario.width - cameraBounds.right;
+            } else if (mario.x + mario.width > camera.x + cameraBounds.right) {
+                camera.x = mario.x - cameraBounds.left;
             }
 
             // Adjust the camera's y position based on Mario's position
             if (mario.y < camera.y + cameraBounds.top) {
-                camera.y = mario.y - cameraBounds.top;
-            } else if (mario.y + mario.height > camera.y + cameraBounds.bottom) {
                 camera.y = mario.y + mario.height - cameraBounds.bottom;
+            } else if (mario.y + mario.height > camera.y + cameraBounds.bottom) {
+                camera.y = mario.y - cameraBounds.top;
             }
 
             // Prevent the camera from going out of the level bounds
