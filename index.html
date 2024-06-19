@@ -115,7 +115,9 @@
             jumpTimer: 0,
             gravity: 1,
             groundLevel: canvas.height - 128,
-            powerUp: 0
+            powerUp: 0,
+            prevX: 0,
+            prevY: 0
         };
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
@@ -201,6 +203,41 @@
                             }
                         }
                     }
+                    const blockX = mario.x;
+                    const blockY = mario.y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + mario.height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + mario.width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from bottom
+                        // mario collides with our top stomping us
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            entities.splice(i, 1);
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                    }
                 },
                 render: function() {
                     if (this.frame == 0) {
@@ -219,6 +256,8 @@
             }
             let prevX = mario.x;
             let prevY = mario.y;
+            mario.prevX = prevX;
+            mario.prevY = prevY;
 
             if (cGL.keysDown[37]) { // Left arrow
                 mario.x -= mario.speed;
@@ -591,18 +630,21 @@
                         }
                         // Collision from bottom
                         else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                            mario.y = blockBottom - hitboxOffset;
-                            mario.jumpSpeed = 0;
-                            ++coinsCollected;
-                            cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
                         }
                         // Collision from left
                         else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                            mario.x = blockLeft - mario.width;
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
                         }
                         // Collision from right
                         else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                            mario.x = blockRight;
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
                         }
                     }
                 }
