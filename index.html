@@ -538,6 +538,19 @@
                             }
                         }
                     }
+                    if (blockType == 9) { //goomba spawn point
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        levelMap[y][x] = 0;
+                        entities.push(goombaTemplate);
+                        entities[entities.length].x = x;
+                        entities[entities.length].y = y;
+                    }
                 }
             }
 
