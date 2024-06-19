@@ -316,7 +316,26 @@
                 camera.x -= 5;
             }
 
+            const marginX = 200;
+            const marginY = 150;
 
+            // Horizontal
+            if (mario.x < camera.x + marginX) {
+                camera.x = mario.x - marginX;
+            } else if (mario.x + mario.width > camera.x + camera.width - marginX) {
+                camera.x = mario.x + mario.width - camera.width + marginX;
+            }
+
+            // Vertical
+            if (mario.y < camera.y + marginY) {
+                camera.y = mario.y - marginY;
+            } else if (mario.y + mario.height > camera.y + camera.height - marginY) {
+                camera.y = mario.y + mario.height - camera.height + marginY;
+            }
+
+            // Prevent the camera from going out of bounds (assuming level boundaries)
+            //camera.x = Math.max(0, Math.min(camera.x, levelWidth - camera.width));
+            //camera.y = Math.max(0, Math.min(camera.y, levelHeight - camera.height));
         }
 
         function handleCollisions(prevX, prevY) {
