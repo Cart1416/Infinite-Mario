@@ -683,16 +683,16 @@
             const bottomBoundary = camera.y + camera.height - camera.margin;
 
             // horizontal
-            if (mario.x < leftBoundary && mario.direction === 'left') {
-                camera.x = mario.x - camera.margin;
-            } else if (mario.x + mario.width > rightBoundary && mario.direction === 'right') {
+            if (mario.x < leftBoundary) {
+                camera.x = mario.x + camera.margin;
+            } else if (mario.x + mario.width > rightBoundary) {
                 camera.x = mario.x + mario.width - camera.width + camera.margin;
             }
 
             // vertical
-            if (mario.y < topBoundary && mario.direction === 'up') {
+            if (mario.y < topBoundary) {
                 camera.y = mario.y - camera.margin;
-            } else if (mario.y + mario.height > bottomBoundary && mario.direction === 'down') {
+            } else if (mario.y + mario.height > bottomBoundary) {
                 camera.y = mario.y + mario.height - camera.height + camera.margin;
             }
 
