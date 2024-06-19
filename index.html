@@ -115,11 +115,11 @@
 
         var entities = [];
 
-        function addGoomba() {
+        function addGoomba(x, y) {
             var goombaTemplate = {
                 id: 1,
-                x: 0,
-                y: 0,
+                x: x,
+                y: y,
                 width: mario.width,
                 height: mario.width,
                 speed: 2,
@@ -200,6 +200,7 @@
                     }
                 }
             };
+            entities.push(goombaTemplate);
         }
 
         function game() {
@@ -552,9 +553,7 @@
                         const blockRight = blockX + blockSize;
 
                         levelMap[y][x] = 0;
-                        entities.push(goombaTemplate);
-                        entities[entities.length - 1].x = x * blockSize;
-                        entities[entities.length - 1].y = y * blockSize;
+                        addGoomba(x * blockSize, y * blockSize);
                     }
                 }
             }
