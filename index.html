@@ -126,6 +126,8 @@
             frameTimer: 0,
             direction: 'right',
             update: function() {
+                let prevX = self.x;
+                let prevY = self.y;
                 if (self.direction == 'left') {
                     self.x -= self.speed;
                 }
