@@ -272,13 +272,13 @@
 
             //camera controls
             if (cGL.keysDown[73]) { // I
-                ++camera.y;
+                camera.y += 5;
             } else if (cGL.keysDown[74]) { // J
-                --camera.x;
+                camera.x += 5;
             } else if (cGL.keysDown[75]) { // K
-                --camera.y;
+                camera.y -= 5;
             } else if (cGL.keysDown[76]) { // L
-                ++camera.x;
+                camera.x -= 5;
             }
         }
 
