@@ -304,7 +304,7 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed) { // Up arrow or space bar
+                        if (gamePads[i].buttons[0].pressed) { // A button
                             if (!mario.jumping) {
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
@@ -314,6 +314,11 @@
                         } else {
                             mario.jumpTimer = 0;
                             gamePadPressed = false;
+                        }
+                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                            ++mario.jumpTimer;
                         }
                     }
                 } else if (userAgent.indexOf("Firefox") > -1) {
@@ -355,7 +360,6 @@
                             mario.jumping = true;
                             mario.jumpSpeed = -15;
                             ++mario.jumpTimer;
-                            keyboardPressed = true;
                         }
                     }
                 }
