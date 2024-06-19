@@ -686,7 +686,7 @@
             if (mario.x < leftBoundary) {
                 camera.x = mario.x + camera.margin;
             } else if (mario.x + mario.width > rightBoundary) {
-                camera.x = mario.x + mario.width - camera.width + camera.margin;
+                camera.x = mario.x - mario.width + camera.width - camera.margin;
             }
 
             // vertical
