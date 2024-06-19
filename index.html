@@ -201,7 +201,7 @@
         var entities = [];
 
         function game() {
-            for (let i = 0; i < entities.length; i++) {
+            for (let i = 0; i < entities.length - 1; i++) {
                 entities[i].update();
             }
             let prevX = mario.x;
@@ -613,7 +613,7 @@
         }
 
         function renderEntities() {
-            for (let i = 0; i < entities.length; i++) {
+            for (let i = 0; i < entities.length - 1; i++) {
                 entities[i].render();
             }
         }
