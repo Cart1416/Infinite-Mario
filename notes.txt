@@ -10,5 +10,8 @@ blocks:
 8: question block (infinite coins)
 9: goomba spawn point
 
+entities:
+1: goomba
+
 mushroom mostly coded but the object can't move
 entities coming soon
