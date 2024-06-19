@@ -683,10 +683,10 @@
             const bottomBoundary = camera.y + camera.height - camera.margin;
 
             // horizontal
-            if (mario.x < leftBoundary && mario.direction === 'left') {
-                camera.x = mario.x + camera.margin;
-            } else if (mario.x + mario.width > rightBoundary && mario.direction === 'right') {
-                camera.x = mario.x - camera.margin;
+            if ((mario.x - camera.x) < camera.margin && mario.direction === 'left') {
+                camera.x -= 10;
+            } else if ((mario.x - camera.x) > (canvas.width - camera.margin) && mario.direction === 'right') {
+                camera.x += 10;
             }
 
             // vertical
