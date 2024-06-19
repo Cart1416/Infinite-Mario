@@ -583,31 +583,14 @@
 
                     if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
                         // Collision from top
-                        if (marioBottom <= blockTop && marioBottom > blockTop) {
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
                             entities.splice(i, 1);
                             cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
                             mario.jumping = true;
                             mario.jumpSpeed = -15;
                         }
-                        // Collision from bottom
-                        else if (marioTop >= blockBottom && marioTop < blockBottom) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
-                        }
-                        // Collision from left
-                        else if (marioRight <= blockLeft && marioRight > blockLeft) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
-                        }
-                        // Collision from right
-                        else if (marioLeft >= blockRight && marioLeft < blockRight) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
-                        }
                     }
+                    cGL.checkCollision(mario, entities[i])
                 }
             }
 
