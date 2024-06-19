@@ -589,9 +589,21 @@
                             mario.jumping = true;
                             mario.jumpSpeed = -15;
                         }
-                    }
-                    if (entities.length > i && typeof entities[i] !== 'undefined') {
-                        cGL.checkCollision(mario, entities[i]);
+                        // Collision from bottom
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            mario.y = blockBottom - hitboxOffset;
+                            mario.jumpSpeed = 0;
+                            ++coinsCollected;
+                            cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            mario.x = blockLeft - mario.width;
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            mario.x = blockRight;
+                        }
                     }
                 }
             }
