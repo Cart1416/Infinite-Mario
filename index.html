@@ -129,7 +129,6 @@
                 frameTimer: 0,
                 direction: 'right',
                 update: function() {
-                    console.log("test");
                     let prevX = self.x;
                     let prevY = self.y;
                     if (self.direction == 'left') {
@@ -196,6 +195,7 @@
                     */
                 },
                 render: function() {
+                    console.log("test");
                     if (self.frame == 0) {
                         cGL.drawImage("Goomba", self.x, self.y, self.width, self.height);
                     } else if (self.frame == 1) {
