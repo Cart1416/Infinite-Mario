@@ -325,32 +325,29 @@
                 camera.x -= 5;
             }
 
-            // Adjust the camera's x position based on Mario's position
-            if (mario.x < camera.x + cameraBounds.left) {
-                camera.x -= (camera.x + cameraBounds.left) - mario.x;
-            } else if (mario.x + mario.width > camera.x + cameraBounds.right) {
-                camera.x += (mario.x + mario.width) - (camera.x + cameraBounds.right);
+            const cameraPaddingX = 200; // Horizontal padding from the screen edge
+            const cameraPaddingY = 150; // Vertical padding from the screen edge
+
+            // Horizontal camera movement
+            if (mario.x + camera.x < cameraPaddingX) {
+                camera.x += cameraPaddingX - (mario.x + camera.x);
+            } else if (mario.x + mario.width + camera.x > camera.width - cameraPaddingX) {
+                camera.x -= (mario.x + mario.width + camera.x) - (camera.width - cameraPaddingX);
             }
 
-            // Adjust the camera's y position based on Mario's position
-            if (mario.y < camera.y + cameraBounds.top) {
-                camera.y -= (camera.y + cameraBounds.top) - mario.y;
-            } else if (mario.y + mario.height > camera.y + cameraBounds.bottom) {
-                camera.y += (mario.y + mario.height) - (camera.y + cameraBounds.bottom);
+            // Vertical camera movement
+            if (mario.y + camera.y < cameraPaddingY) {
+                camera.y += cameraPaddingY - (mario.y + camera.y);
+            } else if (mario.y + mario.height + camera.y > camera.height - cameraPaddingY) {
+                camera.y -= (mario.y + mario.height + camera.y) - (camera.height - cameraPaddingY);
             }
 
             // Prevent the camera from going out of the level bounds
-            if (camera.x < 0) {
-                camera.x = 0;
-            } else if (camera.x + camera.width > levelMap[0].length * mario.width) {
-                camera.x = levelMap[0].length * mario.width - camera.width;
-            }
+            const levelWidth = levelMap[0].length * mario.width;
+            const levelHeight = levelMap.length * mario.height;
 
-            if (camera.y < 0) {
-                camera.y = 0;
-            } else if (camera.y + camera.height > levelMap.length * mario.height) {
-                camera.y = levelMap.length * mario.height - camera.height;
-            }
+            camera.x = Math.min(0, Math.max(camera.x, camera.width - levelWidth));
+            camera.y = Math.min(0, Math.max(camera.y, camera.height - levelHeight));
 
         }
 
