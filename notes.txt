@@ -20,4 +20,41 @@ add goomba spawning and rendering
 
 
 
-camera is so broken
+controller buttons:
+navigator.getGamepads()[0].buttons //this is an array
+firefox:
+0: A
+1: B
+2: Y
+3: X
+4: L
+5: R
+6: ZL
+7: ZR
+8: Select
+9: Start
+10: Home
+11: Click LStick
+12: Click RStick
+13: Up
+14: Down
+15: Left
+16: Right
+chrome:
+0: A
+1: B
+2: X
+3: Y
+4: L
+5: R
+6: ZL
+7: ZR
+8: Select
+9: Start
+10: Click LStick
+11: Click RStick
+12: Up
+13: Down
+14: Left
+15: Right
+16: Home
