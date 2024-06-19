@@ -281,7 +281,8 @@
             const gamePads = navigator.getGamepads();
             if (gamePadAvailable && !keyboardPressed) {
                 if (userAgent.indexOf("Chrome") > -1 || userAgent.indexOf("Chromium") > -1) {
-                    for (let i = 0; i < gamePads.length; i++) {
+                    // chrome is stupid and I decided to be lazy
+                    for (let i = 0; i < 1; i++) {
                         if (gamePads[i].buttons[14].pressed) { // Left arrow
                             mario.x -= mario.speed;
                             mario.direction = 'left';
