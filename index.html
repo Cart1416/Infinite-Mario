@@ -590,7 +590,9 @@
                             mario.jumpSpeed = -15;
                         }
                     }
-                    cGL.checkCollision(mario, entities[i])
+                    if (objects.length > i && typeof objects[i] !== 'undefined') {
+                        cGL.checkCollision(mario, entities[i]);
+                    }
                 }
             }
 
