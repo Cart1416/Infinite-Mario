@@ -157,7 +157,7 @@
                 for (let y = 0; y < levelMap.length; y++) {
                     for (let x = 0; x < levelMap[y].length; x++) {
                         const blockType = levelMap[y][x];
-                        if (blockType !== 4 && blockType !== 7 && blockType !== 9) { //ground
+                        if (blockType != 0 && blockType != 4 && blockType != 7 && blockType != 9) { //ground
                             const blockX = x * blockSize;
                             const blockY = y * blockSize;
                             const blockTop = blockY;
