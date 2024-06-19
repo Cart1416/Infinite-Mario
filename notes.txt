@@ -16,3 +16,8 @@ entities:
 mushroom mostly coded but the object can't move
 entities coming soon (strikethrough)
 add goomba spawning and rendering
+
+
+
+
+camera is so broken
