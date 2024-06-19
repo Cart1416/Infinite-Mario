@@ -157,7 +157,7 @@
                 for (let y = 0; y < levelMap.length; y++) {
                     for (let x = 0; x < levelMap[y].length; x++) {
                         const blockType = levelMap[y][x];
-                        if (blockType != 0 && blockType != 4 && blockType != 7 && blockType != 9) { //ground
+                        if (blockType != 0 && blockType != 4 && blockType != 7 && blockType != 9) {
                             const blockX = x * blockSize;
                             const blockY = y * blockSize;
                             const blockTop = blockY;
@@ -550,8 +550,8 @@
 
                         levelMap[y][x] = 0;
                         entities.push(goombaTemplate);
-                        entities[entities.length - 1].x = x;
-                        entities[entities.length - 1].y = y;
+                        entities[entities.length - 1].x = x * blockSize;
+                        entities[entities.length - 1].y = y * blockSize;
                     }
                 }
             }
