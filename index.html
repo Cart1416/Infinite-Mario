@@ -120,6 +120,17 @@
                     }
                     self.frameTimer = 0;
                 }
+                const blockSize = self.width;
+                const hitboxHeight = self.height;
+                const hitboxOffset = self.height;
+                const selfTop = self.y + hitboxOffset;
+                const selfBottom = self.y + hitboxOffset + hitboxHeight;
+                const selfLeft = self.x;
+                const selfRight = self.x + self.width;
+                const prevBottom = prevY + hitboxOffset + hitboxHeight;
+                const prevTop = prevY + hitboxOffset;
+                const prevLeft = prevX;
+                const prevRight = prevX + self.width;
                 for (let y = 0; y < levelMap.length; y++) {
                     for (let x = 0; x < levelMap[y].length; x++) {
                         const blockType = levelMap[y][x];
@@ -134,22 +145,19 @@
                             if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
                                 // Collision from top
                                 if (prevBottom <= blockTop && marioBottom > blockTop) {
-                                    mario.y = blockTop - hitboxHeight - hitboxOffset;
-                                    mario.jumping = false;
-                                    mario.jumpSpeed = 0;
+                                    self.y = blockTop - hitboxHeight - hitboxOffset;
                                 }
                                 // Collision from bottom
                                 else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                                    mario.y = blockBottom - hitboxOffset;
-                                    mario.jumpSpeed = 0;
+                                    self.y = blockBottom - hitboxOffset;
                                 }
                                 // Collision from left
                                 else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                                    mario.x = blockLeft - mario.width;
+                                    self.x = blockLeft - self.width;
                                 }
                                 // Collision from right
                                 else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                                    mario.x = blockRight;
+                                    self.x = blockRight;
                                 }
                             }
                         }
