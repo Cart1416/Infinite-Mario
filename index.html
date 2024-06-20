@@ -316,7 +316,7 @@
                             ++mario.jumpTimer;
                             gamePadPressed = true;
                         } else {
-                            mario.jumpTimer = 0;
+                            setTimeout(function(){ mario.jumpTimer = 0; }, 500);
                             gamePadPressed = false;
                         }
                         if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8 && !mario.highJumping) { // A button high jump
@@ -360,7 +360,7 @@
                             ++mario.jumpTimer;
                             gamePadPressed = true;
                         } else {
-                            mario.jumpTimer = 0;
+                            setTimeout(function(){ mario.jumpTimer = 0; }, 500);
                             gamePadPressed = false;
                         }
                         if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8 && !mario.highJumping) { // A button high jump
@@ -406,7 +406,7 @@
                     keyboardPressed = true;
                     mario.highJumping = false;
                 } else {
-                    mario.jumpTimer = 0;
+                    setTimeout(function(){ mario.jumpTimer = 0; }, 500);
                 }
 
                 if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 8 && !mario.highJumping) { // Up arrow or space bar high jump
