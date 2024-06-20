@@ -322,6 +322,7 @@
                             mario.jumping = true;
                             mario.jumpSpeed = -15;
                             ++mario.jumpTimer;
+                            setTimeout(function(){ mario.highJumping = false; }, 500);
                         }
                     }
                 } else if (userAgent.indexOf("Firefox") > -1) {
@@ -364,6 +365,7 @@
                             mario.jumping = true;
                             mario.jumpSpeed = -15;
                             ++mario.jumpTimer;
+                            setTimeout(function(){ mario.highJumping = false; }, 500);
                         }
                     }
                 }
@@ -409,6 +411,7 @@
                     mario.jumpSpeed = -15;
                     ++mario.jumpTimer;
                     keyboardPressed = true;
+                    setTimeout(function(){ mario.highJumping = false; }, 500);
                 }
             }
 
