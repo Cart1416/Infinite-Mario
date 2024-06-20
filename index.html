@@ -307,7 +307,7 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && mario.onGround) { // A button
+                        if (gamePads[i].buttons[0].pressed && mario.onGround && !(mario.jumpTimer > 8)) { // A button
                             if (!mario.jumping) {
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
@@ -351,7 +351,7 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && mario.onGround) { // A button
+                        if (gamePads[i].buttons[0].pressed && mario.onGround && !(mario.jumpTimer > 8)) { // A button
                             if (!mario.jumping) {
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
@@ -397,7 +397,7 @@
                     keyboardPressed = false;
                 }
 
-                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.onGround) { // Up arrow or space bar
+                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.onGround && !(mario.jumpTimer > 8)) { // Up arrow or space bar
                     if (!mario.jumping) {
                         mario.jumping = true;
                         mario.jumpSpeed = -15;
@@ -468,6 +468,9 @@
 
         function handleCollisions(prevX, prevY) {
             mario.onGround = false;
+            if (mario.jumpTimer == 8 || mario.jumpTimer == 7 || mario.jumpTimer == 9) {
+                mario.onGround = true;
+            }
             const blockSize = mario.width;
             const hitboxHeight = mario.powerUp === 0 ? mario.height / 2 : mario.height;
             const hitboxOffset = mario.powerUp === 0 ? mario.height / 2 : 0;
