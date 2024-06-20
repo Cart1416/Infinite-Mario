@@ -310,6 +310,7 @@
                             if (!mario.jumping) {
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
+                                mario.highJumping = false;
                             }
                             ++mario.jumpTimer;
                             gamePadPressed = true;
@@ -353,6 +354,7 @@
                             if (!mario.jumping) {
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
+                                mario.highJumping = false;
                             }
                             ++mario.jumpTimer;
                             gamePadPressed = true;
@@ -401,6 +403,7 @@
                     }
                     ++mario.jumpTimer;
                     keyboardPressed = true;
+                    mario.highJumping = false;
                 } else {
                     mario.jumpTimer = 0;
                 }
