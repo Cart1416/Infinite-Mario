@@ -137,9 +137,7 @@
             groundLevel: canvas.height - 128,
             powerUp: 0,
             prevX: 0,
-            prevY: 0,
-            highJumping: false,
-            onGround: false
+            prevY: 0
         };
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
@@ -283,7 +281,8 @@
             const gamePads = navigator.getGamepads();
             if (gamePadAvailable && !keyboardPressed) {
                 if (userAgent.indexOf("Chrome") > -1 || userAgent.indexOf("Chromium") > -1) {
-                    for (let i = 0; i < gamePads.length; i++) {
+                    // chrome is stupid and I decided to be lazy
+                    for (let i = 0; i < 1; i++) {
                         if (gamePads[i].buttons[14].pressed) { // Left arrow
                             mario.x -= mario.speed;
                             mario.direction = 'left';
@@ -306,26 +305,21 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && !(mario.jumpTimer > 8)) { // A button
-                            if (mario.onGround) {
-                                if (!mario.jumping) {
-                                    mario.jumping = true;
-                                    mario.jumpSpeed = -15;
-                                    mario.highJumping = false;
-                                }
-                                ++mario.jumpTimer;
-                                gamePadPressed = true;
+                        if (gamePads[i].buttons[0].pressed) { // A button
+                            if (!mario.jumping) {
+                                mario.jumping = true;
+                                mario.jumpSpeed = -15;
                             }
+                            ++mario.jumpTimer;
+                            gamePadPressed = true;
                         } else {
                             mario.jumpTimer = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8 && !mario.highJumping) { // A button high jump
-                            mario.highJumping = true;
+                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
                             mario.jumping = true;
                             mario.jumpSpeed = -15;
                             ++mario.jumpTimer;
-                            setTimeout(function(){ mario.highJumping = false; }, 500);
                         }
                     }
                 } else if (userAgent.indexOf("Firefox") > -1) {
@@ -352,26 +346,21 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && !(mario.jumpTimer > 8)) { // A button
-                            if (mario.onGround) {
-                                if (!mario.jumping) {
-                                    mario.jumping = true;
-                                    mario.jumpSpeed = -15;
-                                    mario.highJumping = false;
-                                }
-                                ++mario.jumpTimer;
-                                gamePadPressed = true;
+                        if (gamePads[i].buttons[0].pressed) { // A button
+                            if (!mario.jumping) {
+                                mario.jumping = true;
+                                mario.jumpSpeed = -15;
                             }
+                            ++mario.jumpTimer;
+                            gamePadPressed = true;
                         } else {
-                            setTimeout(function(){ mario.jumpTimer = 0; }, 500);
+                            mario.jumpTimer = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8 && !mario.highJumping) { // A button high jump
-                            mario.highJumping = true;
+                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
                             mario.jumping = true;
                             mario.jumpSpeed = -15;
                             ++mario.jumpTimer;
-                            setTimeout(function(){ mario.highJumping = false; }, 500);
                         }
                     }
                 }
@@ -400,27 +389,22 @@
                     keyboardPressed = false;
                 }
 
-                if ((cGL.keysDown[38] || cGL.keysDown[32]) && !(mario.jumpTimer > 8)) { // Up arrow or space bar
-                    if (mario.onGround) {
-                        if (!mario.jumping) {
-                            mario.jumping = true;
-                            mario.jumpSpeed = -15;
-                            mario.highJumping = false;
-                        }
-                        ++mario.jumpTimer;
-                        gamePadPressed = true;
+                if ((cGL.keysDown[38] || cGL.keysDown[32])) { // Up arrow or space bar
+                    if (!mario.jumping) {
+                        mario.jumping = true;
+                        mario.jumpSpeed = -15;
                     }
+                    ++mario.jumpTimer;
+                    keyboardPressed = true;
                 } else {
-                    setTimeout(function(){ mario.jumpTimer = 0; }, 500);
+                    mario.jumpTimer = 0;
                 }
 
-                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 8 && !mario.highJumping) { // Up arrow or space bar high jump
-                    mario.highJumping = true;
+                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 8) { // Up arrow or space bar
                     mario.jumping = true;
                     mario.jumpSpeed = -15;
                     ++mario.jumpTimer;
                     keyboardPressed = true;
-                    setTimeout(function(){ mario.highJumping = false; }, 500);
                 }
             }
 
@@ -472,10 +456,6 @@
         }
 
         function handleCollisions(prevX, prevY) {
-            mario.onGround = false;
-            if (mario.jumpTimer == 8 || mario.jumpTimer == 7 || mario.jumpTimer == 9) {
-                mario.onGround = true;
-            }
             const blockSize = mario.width;
             const hitboxHeight = mario.powerUp === 0 ? mario.height / 2 : mario.height;
             const hitboxOffset = mario.powerUp === 0 ? mario.height / 2 : 0;
@@ -505,7 +485,6 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -536,7 +515,6 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -571,7 +549,6 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -637,7 +614,6 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -671,7 +647,6 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -741,7 +716,6 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
-                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -881,7 +855,6 @@
             const x = canvas.width / 2;
             const y = 30;
             cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
-            cGL.drawText(`jumpTimer: ${mario.jumpTimer}`, x + 500, y, "24px '8bit'", "black", "center", "top");
         }
 
         cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!")
