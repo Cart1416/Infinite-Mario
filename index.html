@@ -138,7 +138,8 @@
             powerUp: 0,
             prevX: 0,
             prevY: 0,
-            highJumping: false
+            highJumping: false,
+            onGround: false
         };
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
@@ -306,7 +307,7 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed) { // A button
+                        if (gamePads[i].buttons[0].pressed && mario.onGround) { // A button
                             if (!mario.jumping) {
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
@@ -350,7 +351,7 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed) { // A button
+                        if (gamePads[i].buttons[0].pressed && mario.onGround) { // A button
                             if (!mario.jumping) {
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
@@ -396,7 +397,7 @@
                     keyboardPressed = false;
                 }
 
-                if ((cGL.keysDown[38] || cGL.keysDown[32])) { // Up arrow or space bar
+                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.onGround) { // Up arrow or space bar
                     if (!mario.jumping) {
                         mario.jumping = true;
                         mario.jumpSpeed = -15;
@@ -427,6 +428,15 @@
 
             // Check for collisions
             handleCollisions(prevX, prevY);
+
+            if (mario.y >= groundLevel) { // Assuming groundLevel is defined
+                mario.y = groundLevel;
+                mario.jumping = false;
+                mario.jumpSpeed = 0;
+                mario.onGround = true;
+            } else {
+                mario.onGround = false;
+            }
 
             //camera controls
             if (cGL.keysDown[73]) { // I
