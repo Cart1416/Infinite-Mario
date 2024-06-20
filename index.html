@@ -429,15 +429,6 @@
             // Check for collisions
             handleCollisions(prevX, prevY);
 
-            if (mario.y >= groundLevel) { // Assuming groundLevel is defined
-                mario.y = groundLevel;
-                mario.jumping = false;
-                mario.jumpSpeed = 0;
-                mario.onGround = true;
-            } else {
-                mario.onGround = false;
-            }
-
             //camera controls
             if (cGL.keysDown[73]) { // I
                 camera.y += 5;
@@ -476,6 +467,7 @@
         }
 
         function handleCollisions(prevX, prevY) {
+            mario.onGround = false;
             const blockSize = mario.width;
             const hitboxHeight = mario.powerUp === 0 ? mario.height / 2 : mario.height;
             const hitboxOffset = mario.powerUp === 0 ? mario.height / 2 : 0;
@@ -505,6 +497,7 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
+                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -535,6 +528,7 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
+                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -569,6 +563,7 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
+                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -634,6 +629,7 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
+                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -667,6 +663,7 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
+                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
@@ -736,6 +733,7 @@
                                 mario.y = blockTop - hitboxHeight - hitboxOffset;
                                 mario.jumping = false;
                                 mario.jumpSpeed = 0;
+                                mario.onGround = true;
                             }
                             // Collision from bottom
                             else if (prevTop >= blockBottom && marioTop < blockBottom) {
