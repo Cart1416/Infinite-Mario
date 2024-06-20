@@ -876,6 +876,7 @@
             const x = canvas.width / 2;
             const y = 30;
             cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
+            cGL.drawText(`jumpTimer: ${mario.jumpTimer}`, x + 100, y, "24px '8bit'", "black", "center", "top");
         }
 
         cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!")
