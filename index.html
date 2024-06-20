@@ -307,16 +307,18 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && mario.onGround && !(mario.jumpTimer > 8)) { // A button
-                            if (!mario.jumping) {
-                                mario.jumping = true;
-                                mario.jumpSpeed = -15;
-                                mario.highJumping = false;
+                        if (gamePads[i].buttons[0].pressed && !(mario.jumpTimer > 8)) { // A button
+                            if (mario.onGround) {
+                                if (!mario.jumping) {
+                                    mario.jumping = true;
+                                    mario.jumpSpeed = -15;
+                                    mario.highJumping = false;
+                                }
+                                ++mario.jumpTimer;
+                                gamePadPressed = true;
                             }
-                            ++mario.jumpTimer;
-                            gamePadPressed = true;
                         } else {
-                            setTimeout(function(){ mario.jumpTimer = 0; }, 500);
+                            mario.jumpTimer = 0;
                             gamePadPressed = false;
                         }
                         if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8 && !mario.highJumping) { // A button high jump
@@ -351,14 +353,16 @@
                             mario.frame = 0;
                             gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && mario.onGround && !(mario.jumpTimer > 8)) { // A button
-                            if (!mario.jumping) {
-                                mario.jumping = true;
-                                mario.jumpSpeed = -15;
-                                mario.highJumping = false;
+                        if (gamePads[i].buttons[0].pressed && !(mario.jumpTimer > 8)) { // A button
+                            if (mario.onGround) {
+                                if (!mario.jumping) {
+                                    mario.jumping = true;
+                                    mario.jumpSpeed = -15;
+                                    mario.highJumping = false;
+                                }
+                                ++mario.jumpTimer;
+                                gamePadPressed = true;
                             }
-                            ++mario.jumpTimer;
-                            gamePadPressed = true;
                         } else {
                             setTimeout(function(){ mario.jumpTimer = 0; }, 500);
                             gamePadPressed = false;
@@ -397,14 +401,16 @@
                     keyboardPressed = false;
                 }
 
-                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.onGround && !(mario.jumpTimer > 8)) { // Up arrow or space bar
-                    if (!mario.jumping) {
-                        mario.jumping = true;
-                        mario.jumpSpeed = -15;
+                if ((cGL.keysDown[38] || cGL.keysDown[32]) && !(mario.jumpTimer > 8)) { // Up arrow or space bar
+                    if (mario.onGround) {
+                        if (!mario.jumping) {
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                            mario.highJumping = false;
+                        }
+                        ++mario.jumpTimer;
+                        gamePadPressed = true;
                     }
-                    ++mario.jumpTimer;
-                    keyboardPressed = true;
-                    mario.highJumping = false;
                 } else {
                     setTimeout(function(){ mario.jumpTimer = 0; }, 500);
                 }
