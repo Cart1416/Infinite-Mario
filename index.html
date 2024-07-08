@@ -159,7 +159,8 @@
             groundLevel: canvas.height - 128,
             powerUp: 0,
             prevX: 0,
-            prevY: 0
+            prevY: 0,
+            canJump: true
         };
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
@@ -387,7 +388,7 @@
                     }
                 }
             }
-            if (!gamePadPressed) {
+            if (!gamePadPressed && mario.canJump) {
                 if (cGL.keysDown[37] || cGL.buttons.leftButton.pressed) { // Left arrow
                     mario.x -= mario.speed;
                     mario.direction = 'left';
@@ -418,6 +419,10 @@
                     }
                     ++mario.jumpTimer;
                     keyboardPressed = true;
+                    mario.canJump = false;
+                    setTimeout(function() {
+                        mario.canJump = true;
+                    }, 500);
                 } else {
                     mario.jumpTimer = 0;
                 }
