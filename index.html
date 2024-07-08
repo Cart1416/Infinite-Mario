@@ -428,7 +428,7 @@
                     mario.jumpTimer = 0;
                 }
 
-                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 8 && mario.jumping) { // Up arrow or space bar
+                if ((cGL.keysDown[38] || cGL.keysDown[32]) && mario.jumpTimer == 8 && mario.jumping && mario.canJump) { // Up arrow or space bar
                     console.log("2");
                     mario.jumping = true;
                     mario.jumpSpeed = -15;
