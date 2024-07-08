@@ -27,11 +27,13 @@
         cGL.initialize("canvas");
         canvas.width = window.innerWidth - 10;
         canvas.height = window.innerHeight - 15;
+
+        var desktopFix = 0;
         
         if (cGL.mobile) {
-            const desktopFix = 9999999;
+            desktopFix = 9999999;
         } else {
-            const desktopFix = 0;
+            desktopFix = 0;
         }
 
         // Example coordinates and sizes for buttons
