@@ -29,20 +29,24 @@
         canvas.height = window.innerHeight - 15;
         
         if (cGL.mobile) {
-            // Example coordinates and sizes for buttons
-            const buttonWidth = 300;
-            const buttonHeight = 150;
-            const buttonPadding = 20;
-            
-            // Add left button
-            cGL.addButton("leftButton", buttonPadding, canvas.height - buttonHeight - buttonPadding, buttonWidth, buttonHeight, true, "Left");
-            
-            // Add right button
-            cGL.addButton("rightButton", buttonPadding + buttonWidth + buttonPadding, canvas.height - buttonHeight - buttonPadding, buttonWidth, buttonHeight, true, "Right");
-            
-            // Add jump button
-            cGL.addButton("jumpButton", canvas.width - buttonWidth - buttonPadding, canvas.height - buttonHeight - buttonPadding, buttonWidth, buttonHeight, true, "Jump");
+            const desktopFix = 9999999;
+        } else {
+            const desktopFix = 0;
         }
+
+        // Example coordinates and sizes for buttons
+        const buttonWidth = 300;
+        const buttonHeight = 150;
+        const buttonPadding = 20;
+
+        // Add left button
+        cGL.addButton("leftButton", buttonPadding + desktopFix, canvas.height - buttonHeight - buttonPadding + desktopFix, buttonWidth, buttonHeight, true, "Left");
+
+        // Add right button
+        cGL.addButton("rightButton", buttonPadding + buttonWidth + buttonPadding + desktopFix, canvas.height - buttonHeight - buttonPadding + desktopFix, buttonWidth, buttonHeight, true, "Right");
+
+        // Add jump button
+        cGL.addButton("jumpButton", canvas.width - buttonWidth - buttonPadding + desktopFix, canvas.height - buttonHeight - buttonPadding, buttonWidth, buttonHeight, true, "Jump");
 
         const assetsDirectory = "https://ahf2139.pythonanywhere.com/images/marioimages";
         const marioRightImgs = [
