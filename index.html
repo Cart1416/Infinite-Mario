@@ -420,7 +420,9 @@
                     }
                     ++mario.jumpTimer;
                     keyboardPressed = true;
-                    mario.canJump = false;
+                    setTimeout(function() {
+                        mario.canJump = false;
+                    }, 200);
                     setTimeout(function() {
                         mario.canJump = true;
                     }, 1000);
