@@ -388,7 +388,7 @@
                     }
                 }
             }
-            if (!gamePadPressed && mario.canJump) {
+            if (!gamePadPressed) {
                 if (cGL.keysDown[37] || cGL.buttons.leftButton.pressed) { // Left arrow
                     mario.x -= mario.speed;
                     mario.direction = 'left';
@@ -413,7 +413,7 @@
                 }
 
                 if ((cGL.keysDown[38] || cGL.keysDown[32] || cGL.buttons.jumpButton.pressed)) { // Up arrow or space bar
-                    if (!mario.jumping) {
+                    if (!mario.jumping && mario.canJump) {
                         mario.jumping = true;
                         mario.jumpSpeed = -15;
                     }
