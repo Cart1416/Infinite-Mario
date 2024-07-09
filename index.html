@@ -521,8 +521,8 @@
                         const marioBlockExactY = mario.y / 64;
                         const marioBlock1Y = Math.floor(marioBlockExactY) + 2; // under marios feet
                         const marioBlock2Y = Math.ceil(marioBlockExactY) + 2; // under marios feet
-                        if (!floorBlocks.includes(levelMap[marioBlock1X][marioBlock1Y]) && !floorBlocks.includes(levelMap[marioBlock2X][marioBlock2Y])) {
-                            //mario.jumpSpeed += mario.gravity; //fall
+                        if (!floorBlocks.includes(levelMap[marioBlock1X][marioBlock1Y]) && !floorBlocks.includes(levelMap[marioBlock2X][marioBlock2Y]) && !mario.jumping) {
+                            mario.jumpSpeed += mario.gravity; //fall
                         }
                     }
                     if (blockType == 1) { //ground
