@@ -161,7 +161,8 @@
             prevX: 0,
             prevY: 0,
             canJump: true,
-            canHighJump: true
+            canHighJump: true,
+            leftRightDisabled: false
         };
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
@@ -390,7 +391,7 @@
                 }
             }
             if (!gamePadPressed) {
-                if (cGL.keysDown[37] || cGL.buttons.leftButton.pressed) { // Left arrow
+                if ((cGL.keysDown[37] || cGL.buttons.leftButton.pressed) && !mario.leftRightDisabled) { // Left arrow
                     mario.x -= mario.speed;
                     mario.direction = 'left';
                     mario.frameTimer++;
@@ -399,7 +400,7 @@
                         mario.frameTimer = 0;
                     }
                     keyboardPressed = true;
-                } else if (cGL.keysDown[39] || cGL.buttons.rightButton.pressed) { // Right arrow
+                } else if ((cGL.keysDown[39] || cGL.buttons.rightButton.pressed) && !mario.leftRightDisabled) { // Right arrow
                     mario.x += mario.speed;
                     mario.direction = 'right';
                     mario.frameTimer++;
@@ -490,6 +491,8 @@
 
         }
 
+        var thing99 = 0;
+
         function handleCollisions(prevX, prevY) {
             const blockSize = mario.width;
             const hitboxHeight = mario.powerUp === 0 ? mario.height / 2 : mario.height;
@@ -520,9 +523,16 @@
                         const marioBlock2X = Math.ceil(marioBlockExactX);
                         const marioBlockExactY = mario.y / 64;
                         const marioBlock1Y = Math.floor(marioBlockExactY) + 2; // under marios feet
-                        const marioBlock2Y = Math.ceil(marioBlockExactY) + 2; // under marios feet
-                        if (!floorBlocks.includes(levelMap[marioBlock1X][marioBlock1Y]) && !floorBlocks.includes(levelMap[marioBlock2X][marioBlock2Y]) && !mario.jumping) {
-                            mario.jumpSpeed += mario.gravity; //fall
+                        const marioBlock2Y = Math.floor(marioBlockExactY) + 2; // under marios feet
+                        thing99 = marioBlock1X + ", " + marioBlock1Y;
+                        try {
+                            if (!floorBlocks.includes(levelMap[marioBlock1Y][marioBlock1X]) && !floorBlocks.includes(levelMap[marioBlock2Y][marioBlock2X]) && !mario.jumping) {
+                                mario.leftRightDisabled = true; //disable right and left movement to uncling from wall
+                            } else {
+                                mario.leftRightDisabled = false; //re enable left and right movement
+                            }
+                        } catch(err) {
+                            console.warn(err.message);
                         }
                     }
                     if (blockType == 1) { //ground
@@ -909,8 +919,7 @@
             const x = canvas.width / 2;
             const y = 30;
             cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
-            cGL.drawText(cGL.buttons.leftButton.pressed, cGL.buttons.leftButton.x, cGL.buttons.leftButton.y - 20, "24px '8bit'", "black", "center", "top");
-            cGL.drawText(cGL.buttons.rightButton.pressed, cGL.buttons.rightButton.x, cGL.buttons.rightButton.y - 20, "24px '8bit'", "black", "center", "top");
+            cGL.drawText(thing99, 0, 0, "24px '8bit'", "black", "left", "top");
         }
 
         cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!")
