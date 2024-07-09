@@ -86,7 +86,7 @@
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
         marioBigRightImgs.forEach((img, index) => cGL.loadImage(`marioBigRight${index}`, img));
         marioBigLeftImgs.forEach((img, index) => cGL.loadImage(`marioBigLeft${index}`, img));
-        blockTypes = 10;
+        blockTypes = 11;
         cGL.loadImage("Goomba", `${assetsDirectory}/entities/Goomba.png`);
         cGL.loadImage("Goomba1", `${assetsDirectory}/entities/Goomba1.png`);
         cGL.loadImage("Mushroom", `${assetsDirectory}/entities/Mushroom.png`);
@@ -127,6 +127,8 @@
         for (let i = 0; i < blockTypes; i++) {
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
+
+        var mouseBlockPos = "0, 0";
 
         var camera = {
             x: 0,
@@ -614,7 +616,20 @@
 
         }
 
-        var thing99 = 0;
+        function edit() {
+            //camera controls
+            if (cGL.keysDown[73]) { // I
+                camera.y += 5;
+            } else if (cGL.keysDown[74]) { // J
+                camera.x += 5;
+            } else if (cGL.keysDown[75]) { // K
+                camera.y -= 5;
+            } else if (cGL.keysDown[76]) { // L
+                camera.x -= 5;
+            }
+
+            mouseBlockPos = (Math.floor(cGL.mousePos.x/64)) + ", " + (Math.floor(cGL.mousePos.y/64));
+        }
 
         function handleCollisions(prevX, prevY) {
             const blockSize = mario.width;
@@ -1088,12 +1103,15 @@
             const x = canvas.width / 2;
             const y = 30;
             cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
-            cGL.drawText(thing99, 0, 0, "24px '8bit'", "black", "left", "top");
         }
 
-        cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!")
+        function renderMouseBlockPos() {
+            cGL.drawText(mouseBlockPos, 0, 0, "24px '8bit'", "black", "left", "top");
+        }
+
+        cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!");
         
-        cGL.addButton("fakeSoundButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound")
+        cGL.addButton("fakeSoundButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound");
 
         function renderTitle() {
             cGL.drawImage("title", (canvas.width / 2) - (352 / 2), canvas.height / 4, 352, 286);
@@ -1102,14 +1120,22 @@
         function checkPlayButton() {
             if (cGL.buttons.playButton.pressed) {
                 renderingState = 2; // we will set this to 1 for level select later
-                cGL.removeButton("playButton")
-                cGL.removeButton("fakeSoundButton")
+                cGL.removeButton("playButton");
+                cGL.removeButton("fakeSoundButton");
                 cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
             }
-            if (cGL.keysDown[69]) { // E
-                camera.x -= 5;
+            try {
+                if (cGL.buttons.editStartButton.pressed) {
+                    cGL.removeButton("editStartButton");
+                    cGL.removeButton("playButton")
+                    cGL.removeButton("fakeSoundButton")
+                    renderingState = 3;
+                }
             }
-            cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound")
+            catch(err) {}
+            if (cGL.keysDown[69]) { // E
+                cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), (canvas.height / 8 * 7) + 50, 100, 40, true, "Edit")
+            }
         }
 
         function render() {
@@ -1127,6 +1153,7 @@
             } else if (renderingState == 3) {
                 cGL.drawBackground(backgroundColor);
                 renderBlocks();
+                renderMouseBlockPos();
             }
         }
 
@@ -1135,6 +1162,9 @@
             if (elapsed > frameInterval) {
                 if (renderingState == 2) {
                     game();
+                }
+                if (renderingState == 3) {
+                    edit();
                 }
                 render();
                 cGL.renderButtons();
