@@ -129,6 +129,8 @@
         }
 
         var mouseBlockPos = "0, 0";
+        var editorCurrentBlock = 1;
+        var allowPlacing = false;
 
         var camera = {
             x: 0,
@@ -629,7 +631,24 @@
             }
 
             mouseBlockPos = (Math.floor(cGL.mousePos.x/64)) + ", " + (Math.floor(cGL.mousePos.y/64));
+            if (cGL.mouseDown && allowPlacing) {
+                levelMap[Math.floor(cGL.mousePos.y/64)][Math.floor(cGL.mousePos.x/64)] = editorCurrentBlock;
+            }
         }
+
+        canvas.addEventListener('wheel', (event) => {
+            if (renderingState == 3) {
+                event.preventDefault();
+
+                if (event.deltaY < 0) {
+                    ++editorCurrentBlock;
+                } else if (event.deltaY > 0) {
+                    if (editorCurrentBlock > 0) {
+                        --editorCurrentBlock;
+                    }
+                }
+            }
+        });
 
         function handleCollisions(prevX, prevY) {
             const blockSize = mario.width;
@@ -856,7 +875,7 @@
                                 mario.jumpSpeed = 0;
                                 levelMap[y][x] = 3;
                                 above = y - 1;
-                                levelMap[above][x] = 7;
+                                levelMap[above][x] = 10;
                                 cGL.playSound(`${assetsDirectory}/sounds/powerUpAppear.mp3`);
                             }
                             // Collision from left
@@ -1107,6 +1126,9 @@
 
         function renderMouseBlockPos() {
             cGL.drawText(mouseBlockPos, 0, 0, "24px '8bit'", "black", "left", "top");
+            cGL.drawImage(`block${editorCurrentBlock}`, 0, 25, 32, 32);
+            cGL.drawText(editorCurrentBlock, 32, 25, "24px '8bit'", "black", "left", "top");
+            cGL.drawImage(`block${editorCurrentBlock}`, (Math.floor(cGL.mousePos.x/64)) * 64, (Math.floor(cGL.mousePos.y/64)) * 64, 64, 64);
         }
 
         cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!");
@@ -1130,6 +1152,7 @@
                     cGL.removeButton("playButton")
                     cGL.removeButton("fakeSoundButton")
                     renderingState = 3;
+                    setTimeout(function() {allowPlacing = true;}, 1000)
                 }
             }
             catch(err) {}
