@@ -503,9 +503,28 @@
             const prevLeft = prevX;
             const prevRight = prevX + mario.width;
 
+            const floorBlocks = [1, 2, 3, 5, 6, 8] // blocks with collision on the top
+
             for (let y = 0; y < levelMap.length; y++) {
                 for (let x = 0; x < levelMap[y].length; x++) {
                     const blockType = levelMap[y][x];
+                    if (true) {
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+                        const marioBlockExactX = mario.x / 64;
+                        const marioBlock1X = Math.floor(marioBlockExactX);
+                        const marioBlock2X = Math.ceil(marioBlockExactX);
+                        const marioBlockExactY = mario.y / 64;
+                        const marioBlock1Y = Math.floor(marioBlockExactY) + 2; // under marios feet
+                        const marioBlock2Y = Math.ceil(marioBlockExactY) + 2; // under marios feet
+                        if (!floorBlocks.includes(levelMap[marioBlock1X][marioBlock1Y]) && !floorBlocks.includes(levelMap[marioBlock2X][marioBlock2Y])) {
+                            mario.jumpSpeed += mario.gravity; //fall
+                        }
+                    }
                     if (blockType == 1) { //ground
                         const blockX = x * blockSize;
                         const blockY = y * blockSize;
