@@ -1106,6 +1106,10 @@
                 cGL.removeButton("fakeSoundButton")
                 cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
             }
+            if (cGL.keysDown[69]) { // E
+                camera.x -= 5;
+            }
+            cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound")
         }
 
         function render() {
@@ -1120,6 +1124,9 @@
                 cGL.drawBackground("#9494ff");
                 renderTitle();
                 checkPlayButton();
+            } else if (renderingState == 3) {
+                cGL.drawBackground(backgroundColor);
+                renderBlocks();
             }
         }
 
