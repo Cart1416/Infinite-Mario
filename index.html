@@ -108,9 +108,6 @@
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ];
 
-
-
-
         var backgroundMusic = "ground_music.mp3";
         var backgroundColor = "#9494ff";
         var spawnPoint = {x: 64, y: 64 * 3}
@@ -622,6 +619,16 @@
 
         }
 
+        function changeBlock(x, y, id) {
+            try {
+                levelMap[y][x] = id;
+            } catch (err) {
+                const emptyList = [];
+                levelMap.push(emptyList);
+                changeBlock(x, y, id);
+            }
+        }
+
         function edit() {
             //camera controls
             if (cGL.keysDown[73]) { // I
@@ -636,7 +643,7 @@
 
             mouseBlockPos = (Math.floor(cGL.mousePos.x/64-camera.x/64)) + ", " + (Math.floor(cGL.mousePos.y/64-camera.y/64));
             if (cGL.mouseDown && allowPlacing) {
-                levelMap[Math.floor(cGL.mousePos.y/64-camera.y/64)][Math.floor(cGL.mousePos.x/64-camera.x/64)] = editorCurrentBlock;
+                changeBlock(Math.floor(cGL.mousePos.x/64-camera.x/64), Math.floor(cGL.mousePos.y/64-camera.y/64), editorCurrentBlock);
             }
 
             if (cGL.keysDown[57]) { // 9
@@ -686,7 +693,7 @@
             event.preventDefault();
 
             if (renderingState == 3 && allowPlacing) {
-                levelMap[Math.floor(cGL.mousePos.y/64-camera.y/64)][Math.floor(cGL.mousePos.x/64-camera.x/64)] = 0;
+                changeBlock(Math.floor(cGL.mousePos.x/64-camera.x/64), Math.floor(cGL.mousePos.y/64-camera.y/64), 0);
             }
         });
 
@@ -1168,7 +1175,7 @@
             cGL.drawText(mouseBlockPos, 0, 0, "24px '8bit'", "black", "left", "top");
             cGL.drawImage(`block${editorCurrentBlock}`, 0, 25, 32, 32);
             cGL.drawText(editorCurrentBlock, 32, 25, "24px '8bit'", "black", "left", "top");
-            cGL.drawImage(`block${editorCurrentBlock}`, (Math.floor(cGL.mousePos.x/64)) * 64, (Math.floor(cGL.mousePos.y/64)) * 64, 64, 64);
+            cGL.drawImage(`block${editorCurrentBlock}`, (Math.floor(cGL.mousePos.x/64) + ((camera.x / 64) % 1)) * 64, (Math.floor(cGL.mousePos.y/64) + ((camera.y / 64) % 1)) * 64, 64, 64);
         }
 
         cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!");
