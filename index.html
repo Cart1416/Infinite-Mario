@@ -107,6 +107,10 @@
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ];
+
+
+
+
         var backgroundMusic = "ground_music.mp3";
         var backgroundColor = "#9494ff";
         var spawnPoint = {x: 64, y: 64 * 3}
@@ -630,13 +634,41 @@
                 camera.x -= 5;
             }
 
-            mouseBlockPos = (Math.floor(cGL.mousePos.x/64)) + ", " + (Math.floor(cGL.mousePos.y/64));
+            mouseBlockPos = (Math.floor(cGL.mousePos.x/64-camera.x/64)) + ", " + (Math.floor(cGL.mousePos.y/64-camera.y/64));
             if (cGL.mouseDown && allowPlacing) {
-                levelMap[Math.floor(cGL.mousePos.y/64)][Math.floor(cGL.mousePos.x/64)] = editorCurrentBlock;
+                levelMap[Math.floor(cGL.mousePos.y/64-camera.y/64)][Math.floor(cGL.mousePos.x/64-camera.x/64)] = editorCurrentBlock;
+            }
+
+            if (cGL.keysDown[57]) { // 9
+                var formattedLevelMap = 'var levelMap = [\n';
+                for (var i = 0; i < levelMap.length; i++) {
+                    formattedLevelMap += '    [' + levelMap[i].join(', ') + ']';
+                    if (i < levelMap.length - 1) {
+                        formattedLevelMap += ',\n';
+                    }
+                }
+                formattedLevelMap += '\n];';
+                var tempTextArea = document.createElement("textarea");
+                tempTextArea.value = formattedLevelMap;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempTextArea);
+
+                console.log("levelMap copied to clipboard!");
+            }
+
+            for (let y = 0; y < levelMap.length; y++) {
+                for (let x = 0; x < levelMap[y].length; x++) {
+                    const blockType = levelMap[y][x];
+                    if ((blockType + "") == "undefined") {
+                        levelMap[y][x] = 0;
+                    }
+                }
             }
         }
 
-        canvas.addEventListener('wheel', (event) => {
+        canvas.addEventListener('wheel', function(event) {
             if (renderingState == 3) {
                 event.preventDefault();
 
@@ -647,6 +679,14 @@
                         --editorCurrentBlock;
                     }
                 }
+            }
+        });
+
+        canvas.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+
+            if (renderingState == 3 && allowPlacing) {
+                levelMap[Math.floor(cGL.mousePos.y/64-camera.y/64)][Math.floor(cGL.mousePos.x/64-camera.x/64)] = 0;
             }
         });
 
