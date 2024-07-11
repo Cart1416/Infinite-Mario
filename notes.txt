@@ -9,14 +9,13 @@ blocks:
 7: mushroom (not moving)
 8: question block (infinite coins)
 9: goomba spawn point
+10: mushroom spawn point
+11: koopa spawn point
 
 entities:
 1: goomba
-
-mushroom mostly coded but the object can't move
-entities coming soon (strikethrough)
-add goomba spawning and rendering
-
+2: mushroom
+3: koopa
 
 
 

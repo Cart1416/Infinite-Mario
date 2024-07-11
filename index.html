@@ -86,13 +86,31 @@
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
         marioBigRightImgs.forEach((img, index) => cGL.loadImage(`marioBigRight${index}`, img));
         marioBigLeftImgs.forEach((img, index) => cGL.loadImage(`marioBigLeft${index}`, img));
-        blockTypes = 11;
+        blockTypes = 12;
         cGL.loadImage("Goomba", `${assetsDirectory}/entities/Goomba.png`);
         cGL.loadImage("Goomba1", `${assetsDirectory}/entities/Goomba1.png`);
+        cGL.loadImage("Koopa", `${assetsDirectory}/entities/Koopa.png`);
+        cGL.loadImage("Koopa1", `${assetsDirectory}/entities/Koopa1.png`);
         cGL.loadImage("Mushroom", `${assetsDirectory}/entities/Mushroom.png`);
 
         // Define your level map
         var levelMap = [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 2, 10, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 9, 9, 9, 0, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        var originalLevelMap = [
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -423,6 +441,131 @@
             entities.push(mushroomTemplate);
         }
 
+        function addKoopa(x, y) {
+            var koopaTemplate = {
+                id: 3, // id of koopa is 3
+                x: x,
+                y: y,
+                width: mario.width,
+                height: 16,
+                speed: 2,
+                frame: 0,
+                frameCount: 1, // 2 frames
+                animationSpeed: 30,
+                frameTimer: 0,
+                gravity: 5,
+                direction: 'left',
+                update: function() {
+                    let prevX = this.x;
+                    let prevY = this.y;
+                    if (this.direction == 'left') {
+                        this.x -= this.speed;
+                    }
+                    if (this.direction == 'right') {
+                        this.x += this.speed;
+                    }
+                    this.frameTimer++;
+                    if (this.frameTimer >= this.animationSpeed) {
+                        if (this.frame >= this.frameCount) {
+                            this.frame = 0;
+                        } else {
+                            ++this.frame;
+                        }
+                        this.frameTimer = 0;
+                    }
+                    this.y += this.gravity;
+                    const blockSize = this.width;
+                    const hitboxHeight = this.height;
+                    const hitboxOffset = this.height - 64;
+                    const marioTop = this.y + hitboxOffset;
+                    const marioBottom = this.y + hitboxOffset + hitboxHeight;
+                    const marioLeft = this.x;
+                    const marioRight = this.x + this.width;
+                    const prevBottom = prevY + hitboxOffset + hitboxHeight;
+                    const prevTop = prevY + hitboxOffset;
+                    const prevLeft = prevX;
+                    const prevRight = prevX + this.width;
+                    for (let y = 0; y < levelMap.length; y++) {
+                        for (let x = 0; x < levelMap[y].length; x++) {
+                            const blockType = levelMap[y][x];
+                            if ((blockType != 0) && (blockType != 4) && (blockType != 7) && (blockType != 9) && (blockType != 10)) {
+                                const blockX = x * blockSize;
+                                const blockY = y * blockSize;
+                                const blockTop = blockY;
+                                const blockBottom = blockY + blockSize;
+                                const blockLeft = blockX;
+                                const blockRight = blockX + blockSize;
+
+                                if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                                    // Collision from top
+                                    if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                        this.y = blockTop - hitboxHeight - hitboxOffset;
+                                    }
+                                    // Collision from bottom
+                                    else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                        this.y = blockBottom - hitboxOffset;
+                                    }
+                                    // Collision from left
+                                    else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                        this.x = blockLeft - this.width;
+                                        this.direction = 'left';
+                                    }
+                                    // Collision from right
+                                    else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                        this.x = blockRight;
+                                        this.direction = 'right';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    const blockX = mario.x;
+                    const blockY = mario.y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + mario.height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + mario.width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from bottom
+                        // mario collides with our top stomping us
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            entities.splice(i, 1);
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                    }
+                },
+                render: function() {
+                    if (this.frame == 0) {
+                        cGL.drawImage("Koopa", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                    } else if (this.frame == 1) {
+                        cGL.drawImage("Koopa1", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                    }
+                }
+            };
+            entities.push(koopaTemplate);
+        }
+
         function game() {
             for (let i = 0; i < entities.length; i++) {
                 entities[i].update();
@@ -617,6 +760,15 @@
             camera.x = Math.min(0, Math.max(camera.x, camera.width - levelWidth));
             camera.y = Math.min(0, Math.max(camera.y, camera.height - levelHeight));
 
+            try {
+                if (cGL.buttons.editPlayLevelButton.pressed) {
+                    cGL.buttons.editPlayLevelButton.text = "Play!";
+                    allowPlacing = false;
+                    setTimeout(function() {allowPlacing = true;}, 100);
+                    levelMap = structuredClone(originalLevelMap);
+                    renderingState = 3;
+                }
+            } catch(err) {}
         }
 
         function changeBlock(x, y, id) {
@@ -642,7 +794,7 @@
             }
 
             mouseBlockPos = (Math.floor(cGL.mousePos.x/64-camera.x/64)) + ", " + (Math.floor(cGL.mousePos.y/64-camera.y/64));
-            if (cGL.mouseDown && allowPlacing) {
+            if (cGL.mouseDown && allowPlacing && !cGL.buttons.editPlayLevelButton.pressed) {
                 changeBlock(Math.floor(cGL.mousePos.x/64-camera.x/64), Math.floor(cGL.mousePos.y/64-camera.y/64), editorCurrentBlock);
             }
 
@@ -672,6 +824,15 @@
                         levelMap[y][x] = 0;
                     }
                 }
+            }
+
+            if (cGL.buttons.editPlayLevelButton.pressed && allowPlacing) {
+                entities = [];
+                originalLevelMap = structuredClone(levelMap);
+                mario.x = spawnPoint.x;
+                mario.y = spawnPoint.y;
+                cGL.buttons.editPlayLevelButton.text = "Stop!";
+                setTimeout(function() {renderingState = 2;}, 100);
             }
         }
 
@@ -1024,6 +1185,17 @@
                         levelMap[y][x] = 0;
                         addMushroom(x * blockSize, y * blockSize);
                     }
+                    if (blockType == 11) { //koopa spawn point
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        levelMap[y][x] = 0;
+                        addKoopa(x * blockSize, y * blockSize);
+                    }
                 }
             }
 
@@ -1097,6 +1269,45 @@
                             entities.splice(i, 1);
                             mario.powerUp = 1;
                             cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                    }
+                }
+                if (entityType == 3) { //koopa
+                    const blockX = entities[i].x;
+                    const blockY = entities[i].y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + entities[i].height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + entities[i].width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top mario stomps on us
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            const x = blockX;
+                            const y = blockY + 8;
+                            entities.splice(i, 1);
+                            // we will add a shell to our pos
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from bottom
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            mario.x = spawnPoint.x;
+                            mario.y = spawnPoint.y;
+                            alert("insert death screen here");
                         }
                     }
                 }
@@ -1199,7 +1410,8 @@
                     cGL.removeButton("playButton")
                     cGL.removeButton("fakeSoundButton")
                     renderingState = 3;
-                    setTimeout(function() {allowPlacing = true;}, 1000)
+                    cGL.addButton("editPlayLevelButton", 0, 60, 60, 40, true, "Play!");
+                    setTimeout(function() {allowPlacing = true;}, 1000);
                 }
             }
             catch(err) {}
