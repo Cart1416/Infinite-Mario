@@ -11,12 +11,13 @@ blocks:
 9: goomba spawn point
 10: mushroom spawn point
 11: koopa spawn point
+12: shell
 
 entities:
 1: goomba
 2: mushroom
 3: koopa
-
+4: shell
 
 
 controller buttons:
@@ -57,3 +58,8 @@ chrome:
 14: Left
 15: Right
 16: Home
+
+
+
+
+the handleCollisions function detects when mario runs into something but the collision detection in the entities detects when the entitiy runs into a block or mario
