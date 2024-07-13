@@ -198,6 +198,26 @@
         var coinsCollected = 0;
         var lives = 5;
 
+        function deepCloneArray(arr) {
+            if (!Array.isArray(arr)) {
+                throw new Error('Input is not an array');
+            }
+
+            let clone = [];
+
+            for (let i = 0; i < arr.length; i++) {
+                if (Array.isArray(arr[i])) {
+                    clone[i] = deepCloneArray(arr[i]); // Recursively clone nested arrays
+                } else if (typeof arr[i] === 'object' && arr[i] !== null) {
+                    clone[i] = deepCloneObject(arr[i]); // Handle nested objects
+                } else {
+                    clone[i] = arr[i]; // Primitive types
+                }
+            }
+
+            return clone;
+        }
+
         var entities = [];
 
         function addGoomba(x, y) {
@@ -732,7 +752,7 @@
             --lives;
             setTimeout(function() {
                 entities = [];
-                levelMap = structuredClone(originalLevelMap);
+                levelMap = deepCloneArray(originalLevelMap);
                 mario.x = spawnPoint.x;
                 mario.y = spawnPoint.y;
                 if (editorEnabled) {
@@ -943,7 +963,7 @@
                     cGL.buttons.editPlayLevelButton.text = "Play!";
                     allowPlacing = false;
                     setTimeout(function() {allowPlacing = true;}, 100);
-                    levelMap = structuredClone(originalLevelMap);
+                    levelMap = deepCloneArray(originalLevelMap);
                     renderingState = 3;
                     cGL.stopBackgroundMusic();
                 }
@@ -1008,7 +1028,7 @@
             if (cGL.buttons.editPlayLevelButton.pressed && allowPlacing) {
                 cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
                 entities = [];
-                originalLevelMap = structuredClone(levelMap);
+                originalLevelMap = deepCloneArray(levelMap);
                 mario.x = spawnPoint.x;
                 mario.y = spawnPoint.y;
                 cGL.buttons.editPlayLevelButton.text = "Stop!";
@@ -1622,7 +1642,7 @@
         function checkPlayButton() {
             if (cGL.buttons.playButton.pressed) {
                 entities = [];
-                originalLevelMap = structuredClone(levelMap);
+                originalLevelMap = deepCloneArray(levelMap);
                 mario.x = spawnPoint.x;
                 mario.y = spawnPoint.y;
                 lives = startingLives;
