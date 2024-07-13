@@ -132,6 +132,7 @@
         var backgroundMusic = "ground_music.mp3";
         var backgroundColor = "#9494ff";
         var spawnPoint = {x: 64, y: 64 * 3}
+        var startingLives = 5;
 
         var gamePadAvailable = false;
         var gamePadPressed = false;
@@ -153,6 +154,7 @@
         var mouseBlockPos = "0, 0";
         var editorCurrentBlock = 1;
         var allowPlacing = false;
+        var editorEnabled = false;
 
         var camera = {
             x: 0,
@@ -194,6 +196,7 @@
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
         var coinsCollected = 0;
+        var lives = 5;
 
         var entities = [];
 
@@ -285,9 +288,7 @@
                     if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
                         // Collision from top
                         if (prevBottom <= blockTop && marioBottom > blockTop) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from bottom
                         // mario collides with our top stomping us
@@ -299,15 +300,11 @@
                         }
                         // Collision from left
                         else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from right
                         else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                     }
                 },
@@ -532,9 +529,7 @@
                     if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
                         // Collision from top
                         if (prevBottom <= blockTop && marioBottom > blockTop) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from bottom
                         // mario collides with our top stomping us
@@ -549,15 +544,11 @@
                         }
                         // Collision from left
                         else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from right
                         else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                     }
                 },
@@ -669,9 +660,7 @@
                             // Collision from top
                             if (prevBottom <= blockTop && marioBottom > blockTop) {
                                 if (this.moving) {
-                                    mario.x = spawnPoint.x;
-                                    mario.y = spawnPoint.y;
-                                    alert("insert death screen here");
+                                    die();
                                 }
                             }
                             // Collision from bottom
@@ -684,17 +673,13 @@
                             // Collision from left
                             else if (prevRight <= blockLeft && marioRight > blockLeft) {
                                 if (this.moving) {
-                                    mario.x = spawnPoint.x;
-                                    mario.y = spawnPoint.y;
-                                    alert("insert death screen here");
+                                    die();
                                 }
                             }
                             // Collision from right
                             else if (prevLeft >= blockRight && marioLeft < blockRight) {
                                 if (this.moving) {
-                                    mario.x = spawnPoint.x;
-                                    mario.y = spawnPoint.y;
-                                    alert("insert death screen here");
+                                    die();
                                 }
                             }
                         }
@@ -739,6 +724,24 @@
                 }
             };
             entities.push(shellTemplate);
+        }
+
+        function die() {
+            renderingState = 4;
+            cGL.stopBackgroundMusic();
+            --lives;
+            setTimeout(function() {
+                entities = [];
+                levelMap = structuredClone(originalLevelMap);
+                mario.x = spawnPoint.x;
+                mario.y = spawnPoint.y;
+                if (editorEnabled) {
+                    renderingState = 3;
+                } else {
+                    renderingState = 2;
+                    cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                }
+            }, 5000)
         }
 
         function game() {
@@ -942,6 +945,7 @@
                     setTimeout(function() {allowPlacing = true;}, 100);
                     levelMap = structuredClone(originalLevelMap);
                     renderingState = 3;
+                    cGL.stopBackgroundMusic();
                 }
             } catch(err) {}
         }
@@ -1002,6 +1006,7 @@
             }
 
             if (cGL.buttons.editPlayLevelButton.pressed && allowPlacing) {
+                cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
                 entities = [];
                 originalLevelMap = structuredClone(levelMap);
                 mario.x = spawnPoint.x;
@@ -1405,21 +1410,15 @@
                         }
                         // Collision from bottom
                         else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from left
                         else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from right
                         else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                     }
                 }
@@ -1479,21 +1478,15 @@
                         }
                         // Collision from bottom
                         else if (prevTop >= blockBottom && marioTop < blockBottom) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from left
                         else if (prevRight <= blockLeft && marioRight > blockLeft) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                         // Collision from right
                         else if (prevLeft >= blockRight && marioLeft < blockRight) {
-                            mario.x = spawnPoint.x;
-                            mario.y = spawnPoint.y;
-                            alert("insert death screen here");
+                            die();
                         }
                     }
                 }
@@ -1517,17 +1510,13 @@
                         // Collision from bottom
                         else if (prevTop >= blockBottom && marioTop < blockBottom) {
                             if (entities[i].moving) {
-                                mario.x = spawnPoint.x;
-                                mario.y = spawnPoint.y;
-                                alert("insert death screen here");
+                                die();
                             }
                         }
                         // Collision from left
                         else if (prevRight <= blockLeft && marioRight > blockLeft) {
                             if (entities[i].moving) {
-                                mario.x = spawnPoint.x;
-                                mario.y = spawnPoint.y;
-                                alert("insert death screen here");
+                                die();
                             } else {
                                 entities[i].direction = "right";
                                 entities[i].moving = true;
@@ -1536,9 +1525,7 @@
                         // Collision from right
                         else if (prevLeft >= blockRight && marioLeft < blockRight) {
                             if (entities[i].moving) {
-                                mario.x = spawnPoint.x;
-                                mario.y = spawnPoint.y;
-                                alert("insert death screen here");
+                                die();
                             } else {
                                 entities[i].direction = "left";
                                 entities[i].moving = true;
@@ -1634,6 +1621,12 @@
 
         function checkPlayButton() {
             if (cGL.buttons.playButton.pressed) {
+                entities = [];
+                originalLevelMap = structuredClone(levelMap);
+                mario.x = spawnPoint.x;
+                mario.y = spawnPoint.y;
+                lives = startingLives;
+                coinsCollected = 0;
                 renderingState = 2; // we will set this to 1 for level select later
                 cGL.removeButton("playButton");
                 cGL.removeButton("fakeSoundButton");
@@ -1642,8 +1635,9 @@
             try {
                 if (cGL.buttons.editStartButton.pressed) {
                     cGL.removeButton("editStartButton");
-                    cGL.removeButton("playButton")
-                    cGL.removeButton("fakeSoundButton")
+                    cGL.removeButton("playButton");
+                    cGL.removeButton("fakeSoundButton");
+                    editorEnabled = true;
                     renderingState = 3;
                     cGL.addButton("editPlayLevelButton", 0, 60, 60, 40, true, "Play!");
                     setTimeout(function() {allowPlacing = true;}, 1000);
@@ -1653,6 +1647,14 @@
             if (cGL.keysDown[69]) { // E
                 cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), (canvas.height / 8 * 7) + 50, 100, 40, true, "Edit")
             }
+        }
+
+        function renderDeathScreen() {
+            cGL.drawBackground("black");
+            const text = `Lives: ${lives}`;
+            const x = canvas.width / 2;
+            const y = canvas.height/ 2;
+            cGL.drawText(text, x, y, "24px '8bit'", "white", "center", "top");
         }
 
         function render() {
@@ -1671,6 +1673,8 @@
                 cGL.drawBackground(backgroundColor);
                 renderBlocks();
                 renderMouseBlockPos();
+            } else if (renderingState == 4) {
+                renderDeathScreen();
             }
         }
 
