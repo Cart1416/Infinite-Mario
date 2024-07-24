@@ -86,6 +86,7 @@
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
         marioBigRightImgs.forEach((img, index) => cGL.loadImage(`marioBigRight${index}`, img));
         marioBigLeftImgs.forEach((img, index) => cGL.loadImage(`marioBigLeft${index}`, img));
+        cGL.loadImage("marioDeathSprite", `${assetsDirectory}/Mario_Death.png`);
         blockTypes = 13;
         cGL.loadImage("Goomba", `${assetsDirectory}/entities/Goomba.png`);
         cGL.loadImage("Goomba1", `${assetsDirectory}/entities/Goomba1.png`);
@@ -191,7 +192,11 @@
             prevY: 0,
             canJump: true,
             canHighJump: true,
-            leftRightDisabled: false
+            leftRightDisabled: false,
+            visible: true,
+            alive: true,
+            canMove: true,
+            deathAnimation: false
         };
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
@@ -747,21 +752,38 @@
         }
 
         function die() {
-            renderingState = 4;
-            cGL.stopBackgroundMusic();
-            --lives;
-            setTimeout(function() {
-                entities = [];
-                levelMap = deepCloneArray(originalLevelMap);
-                mario.x = spawnPoint.x;
-                mario.y = spawnPoint.y;
-                if (editorEnabled) {
-                    renderingState = 3;
-                } else {
-                    renderingState = 2;
-                    cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
-                }
-            }, 5000)
+            if (mario.alive) {
+                mario.alive = false;
+                //mario.visible = false;
+                mario.canMove = false;
+                mario.deathAnimation = true;
+                cGL.stopBackgroundMusic();
+                cGL.playSound(`${assetsDirectory}/sounds/death.mp3`);
+                --lives;
+                setTimeout(function() {
+                    renderingState = 4;
+                    setTimeout(function() {
+                        entities = [];
+                        levelMap = deepCloneArray(originalLevelMap);
+                        mario.x = spawnPoint.x;
+                        mario.y = spawnPoint.y;
+                        if (editorEnabled) {
+                            mario.deathAnimation = false;
+                            renderingState = 3;
+                            mario.alive = true;
+                            //mario.visible = true;
+                            mario.canMove = true;
+                        } else {
+                            mario.deathAnimation = false;
+                            renderingState = 2;
+                            mario.alive = true;
+                            //mario.visible = true;
+                            mario.canMove = true;
+                            cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                        }
+                    }, 3000)
+                }, 5000)
+            }
         }
 
         function game() {
@@ -773,146 +795,147 @@
             mario.prevX = prevX;
             mario.prevY = prevY;
             const gamePads = navigator.getGamepads();
-            if (gamePadAvailable && !keyboardPressed) {
-                if (userAgent.indexOf("Chrome") > -1 || userAgent.indexOf("Chromium") > -1) {
-                    // chrome is stupid and I decided to be lazy
-                    for (let i = 0; i < 1; i++) {
-                        if (gamePads[i].buttons[14].pressed) { // Left arrow
-                            mario.x -= mario.speed;
-                            mario.direction = 'left';
-                            mario.frameTimer++;
-                            if (mario.frameTimer >= mario.animationSpeed) {
-                                mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                                mario.frameTimer = 0;
+            if (mario.canMove) {
+                if (gamePadAvailable && !keyboardPressed) {
+                    if (userAgent.indexOf("Chrome") > -1 || userAgent.indexOf("Chromium") > -1) {
+                        // chrome is stupid and I decided to be lazy
+                        for (let i = 0; i < 1; i++) {
+                            if (gamePads[i].buttons[14].pressed) { // Left arrow
+                                mario.x -= mario.speed;
+                                mario.direction = 'left';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else if (gamePads[i].buttons[15].pressed) { // Right arrow
+                                mario.x += mario.speed;
+                                mario.direction = 'right';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else {
+                                mario.frame = 0;
+                                gamePadPressed = false;
                             }
-                            gamePadPressed = true;
-                        } else if (gamePads[i].buttons[15].pressed) { // Right arrow
-                            mario.x += mario.speed;
-                            mario.direction = 'right';
-                            mario.frameTimer++;
-                            if (mario.frameTimer >= mario.animationSpeed) {
-                                mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                                mario.frameTimer = 0;
+                            if (gamePads[i].buttons[0].pressed) { // A button
+                                if (!mario.jumping) {
+                                    mario.jumping = true;
+                                    mario.jumpSpeed = -15;
+                                }
+                                ++mario.jumpTimer;
+                                gamePadPressed = true;
+                            } else {
+                                mario.jumpTimer = 0;
+                                gamePadPressed = false;
                             }
-                            gamePadPressed = true;
-                        } else {
-                            mario.frame = 0;
-                            gamePadPressed = false;
-                        }
-                        if (gamePads[i].buttons[0].pressed) { // A button
-                            if (!mario.jumping) {
+                            if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
+                                ++mario.jumpTimer;
                             }
-                            ++mario.jumpTimer;
-                            gamePadPressed = true;
-                        } else {
-                            mario.jumpTimer = 0;
-                            gamePadPressed = false;
                         }
-                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
-                            mario.jumping = true;
-                            mario.jumpSpeed = -15;
-                            ++mario.jumpTimer;
-                        }
-                    }
-                } else if (userAgent.indexOf("Firefox") > -1) {
-                    for (let i = 0; i < gamePads.length; i++) {
-                        if (gamePads[i].buttons[15].pressed) { // Left arrow
-                            mario.x -= mario.speed;
-                            mario.direction = 'left';
-                            mario.frameTimer++;
-                            if (mario.frameTimer >= mario.animationSpeed) {
-                                mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                                mario.frameTimer = 0;
+                    } else if (userAgent.indexOf("Firefox") > -1) {
+                        for (let i = 0; i < gamePads.length; i++) {
+                            if (gamePads[i].buttons[15].pressed) { // Left arrow
+                                mario.x -= mario.speed;
+                                mario.direction = 'left';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else if (gamePads[i].buttons[16].pressed) { // Right arrow
+                                mario.x += mario.speed;
+                                mario.direction = 'right';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else {
+                                mario.frame = 0;
+                                gamePadPressed = false;
                             }
-                            gamePadPressed = true;
-                        } else if (gamePads[i].buttons[16].pressed) { // Right arrow
-                            mario.x += mario.speed;
-                            mario.direction = 'right';
-                            mario.frameTimer++;
-                            if (mario.frameTimer >= mario.animationSpeed) {
-                                mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                                mario.frameTimer = 0;
+                            if (gamePads[i].buttons[0].pressed) { // A button
+                                if (!mario.jumping) {
+                                    mario.jumping = true;
+                                    mario.jumpSpeed = -15;
+                                }
+                                ++mario.jumpTimer;
+                                gamePadPressed = true;
+                            } else {
+                                mario.jumpTimer = 0;
+                                gamePadPressed = false;
                             }
-                            gamePadPressed = true;
-                        } else {
-                            mario.frame = 0;
-                            gamePadPressed = false;
-                        }
-                        if (gamePads[i].buttons[0].pressed) { // A button
-                            if (!mario.jumping) {
+                            if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
                                 mario.jumping = true;
                                 mario.jumpSpeed = -15;
+                                ++mario.jumpTimer;
                             }
-                            ++mario.jumpTimer;
-                            gamePadPressed = true;
-                        } else {
-                            mario.jumpTimer = 0;
-                            gamePadPressed = false;
-                        }
-                        if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
-                            mario.jumping = true;
-                            mario.jumpSpeed = -15;
-                            ++mario.jumpTimer;
                         }
                     }
                 }
-            }
-            if (!gamePadPressed) {
-                if ((cGL.keysDown[37] || cGL.buttons.leftButton.pressed) && !mario.leftRightDisabled) { // Left arrow
-                    mario.x -= mario.speed;
-                    mario.direction = 'left';
-                    mario.frameTimer++;
-                    if (mario.frameTimer >= mario.animationSpeed) {
-                        mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                        mario.frameTimer = 0;
+                if (!gamePadPressed) {
+                    if ((cGL.keysDown[37] || cGL.buttons.leftButton.pressed) && !mario.leftRightDisabled) { // Left arrow
+                        mario.x -= mario.speed;
+                        mario.direction = 'left';
+                        mario.frameTimer++;
+                        if (mario.frameTimer >= mario.animationSpeed) {
+                            mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                            mario.frameTimer = 0;
+                        }
+                        keyboardPressed = true;
+                    } else if ((cGL.keysDown[39] || cGL.buttons.rightButton.pressed) && !mario.leftRightDisabled) { // Right arrow
+                        mario.x += mario.speed;
+                        mario.direction = 'right';
+                        mario.frameTimer++;
+                        if (mario.frameTimer >= mario.animationSpeed) {
+                            mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                            mario.frameTimer = 0;
+                        }
+                        keyboardPressed = true;
+                    } else {
+                        mario.frame = 0;
+                        keyboardPressed = false;
                     }
-                    keyboardPressed = true;
-                } else if ((cGL.keysDown[39] || cGL.buttons.rightButton.pressed) && !mario.leftRightDisabled) { // Right arrow
-                    mario.x += mario.speed;
-                    mario.direction = 'right';
-                    mario.frameTimer++;
-                    if (mario.frameTimer >= mario.animationSpeed) {
-                        mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
-                        mario.frameTimer = 0;
-                    }
-                    keyboardPressed = true;
-                } else {
-                    mario.frame = 0;
-                    keyboardPressed = false;
-                }
 
-                if ((cGL.keysDown[38] || cGL.keysDown[32] || cGL.buttons.jumpButton.pressed)) { // Up arrow or space bar
-                    if (!mario.jumping && mario.canJump) {
-                        console.log("1")
-                        mario.jumping = true;
-                        mario.jumpSpeed = -15;
-                    }
-                    if (mario.jumpTimer == 8 && mario.jumping && mario.canJump && mario.canHighJump) {
-                        console.log("2");
-                        mario.canHighJump = false;
-                        mario.jumping = true;
-                        mario.jumpSpeed = -15;
+                    if ((cGL.keysDown[38] || cGL.keysDown[32] || cGL.buttons.jumpButton.pressed)) { // Up arrow or space bar
+                        if (!mario.jumping && mario.canJump) {
+                            console.log("1")
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        if (mario.jumpTimer == 8 && mario.jumping && mario.canJump && mario.canHighJump) {
+                            console.log("2");
+                            mario.canHighJump = false;
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                            ++mario.jumpTimer;
+                            keyboardPressed = true;
+                            setTimeout(function() {
+                                mario.canHighJump = true;
+                            }, 1000);
+                        }
                         ++mario.jumpTimer;
                         keyboardPressed = true;
                         setTimeout(function() {
-                            mario.canHighJump = true;
+                            mario.canJump = false;
+                        }, 200);
+                        setTimeout(function() {
+                            mario.canJump = true;
                         }, 1000);
+                    } else {
+                        mario.jumpTimer = 0;
                     }
-                    ++mario.jumpTimer;
-                    keyboardPressed = true;
-                    setTimeout(function() {
-                        mario.canJump = false;
-                    }, 200);
-                    setTimeout(function() {
-                        mario.canJump = true;
-                    }, 1000);
-                } else {
-                    mario.jumpTimer = 0;
                 }
             }
-
             if (mario.jumpTimer == 1) {
                 cGL.playSound(`${assetsDirectory}/sounds/jump.mp3`);
             }
@@ -1608,7 +1631,13 @@
                     marioImageId = mario.direction === 'right' ? `marioBigRight${mario.frame}` : `marioBigLeft${mario.frame}`;
                 }
             }
-            cGL.drawImage(marioImageId, mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+            if (mario.visible) {
+                if (mario.deathAnimation) {
+                    cGL.drawImage(marioDeathSprite, mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+                } else {
+                    cGL.drawImage(marioImageId, mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+                }
+            }
         }
 
         function renderEntities() {
