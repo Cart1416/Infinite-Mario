@@ -81,7 +81,7 @@
         ];
         var renderingState = 0;
         cGL.loadImage("title", `${assetsDirectory}/Title.png`);
-
+        cGL.loadImage("editorControls", `${assetsDirectory}/editorControls.png`);
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
         marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
         marioBigRightImgs.forEach((img, index) => cGL.loadImage(`marioBigRight${index}`, img));
@@ -156,6 +156,8 @@
         var editorCurrentBlock = 1;
         var allowPlacing = false;
         var editorEnabled = false;
+        var showingEditorHelp = false;
+        var canToggleEditorHelp = true;
 
         var camera = {
             x: 0,
@@ -1072,6 +1074,30 @@
                 cGL.buttons.editPlayLevelButton.text = "Stop!";
                 setTimeout(function() {renderingState = 2;}, 100);
             }
+
+            if (cGL.buttons.editorHelpButton.pressed && allowPlacing) {
+                if (canToggleEditorHelp) {
+                    if (showingEditorHelp) {
+                        showingEditorHelp = false;
+                        canToggleEditorHelp = false;
+                        cGL.removeButton("editorControlsX");
+                    } else {
+                        showingEditorHelp = true;
+                        canToggleEditorHelp = false;
+                        cGL.addButton("editorControlsX", (canvas.width / 2) - 400, (canvas.height / 2) - 300, 800, 600, false, "Edit");
+                    }
+                    setTimeout(function() {
+                        canToggleEditorHelp = true;
+                    }, 500)
+                }
+            }
+
+            try {
+                if (cGL.buttons.editorControlsX.pressed && allowPlacing) {
+                    showingEditorHelp = false;
+                    cGL.removeButton("editorControlsX");
+                }
+            } catch(err) {}
         }
 
         canvas.addEventListener('wheel', function(event) {
@@ -1705,12 +1731,13 @@
                     editorEnabled = true;
                     renderingState = 3;
                     cGL.addButton("editPlayLevelButton", 0, 60, 60, 40, true, "Play!");
+                    cGL.addButton("editorHelpButton", 70, 60, 40, 40, true, "?");
                     setTimeout(function() {allowPlacing = true;}, 1000);
                 }
             }
             catch(err) {}
             if (cGL.keysDown[69]) { // E
-                cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), (canvas.height / 8 * 7) + 50, 100, 40, true, "Edit")
+                cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), (canvas.height / 8 * 7) + 50, 100, 40, true, "Edit");
             }
         }
 
@@ -1720,6 +1747,10 @@
             const x = canvas.width / 2;
             const y = canvas.height/ 2;
             cGL.drawText(text, x, y, "24px '8bit'", "white", "center", "top");
+        }
+
+        function renderEditorHelp() {
+            cGL.drawImage("editorControls", (canvas.width / 2) - 400, (canvas.height / 2) - 300, 800, 600);
         }
 
         function render() {
@@ -1738,8 +1769,14 @@
                 cGL.drawBackground(backgroundColor);
                 renderBlocks();
                 renderMouseBlockPos();
+                if (showingEditorHelp) {
+                    renderEditorHelp();
+                }
             } else if (renderingState == 4) {
                 renderDeathScreen();
+            }
+            if (cGL.keysDown[77]) {
+                cGL.drawText(`mousePos: (${cGL.mousePos.x}, ${cGL.mousePos.y})`, canvas.width / 2, canvas.height / 2, "24px '8bit'", "white", "center", "top");
             }
         }
 
