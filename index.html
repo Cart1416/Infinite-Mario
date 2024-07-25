@@ -196,7 +196,8 @@
             visible: true,
             alive: true,
             canMove: true,
-            deathAnimation: false
+            deathAnimation: false,
+            deathAnimFrame: 0
         };
         mario.x = spawnPoint.x;
         mario.y = spawnPoint.y;
@@ -773,6 +774,7 @@
                             mario.alive = true;
                             //mario.visible = true;
                             mario.canMove = true;
+                            mario.deathAnimFrame = 0;
                         } else {
                             mario.deathAnimation = false;
                             renderingState = 2;
@@ -780,6 +782,7 @@
                             //mario.visible = true;
                             mario.canMove = true;
                             cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                            mario.deathAnimFrame = 0;
                         }
                     }, 3000)
                 }, 5000)
@@ -789,6 +792,16 @@
         function game() {
             for (let i = 0; i < entities.length; i++) {
                 entities[i].update();
+            }
+            if (mario.deathAnimation) {
+                ++mario.deathAnimFrame;
+                if (mario.deathAnimFrame < 20) {
+                    mario.y -= 5;
+                } else {
+                    mario.y += 5;
+                }
+                const max = 250;
+                console.log(mario.deathAnimFrame);
             }
             let prevX = mario.x;
             let prevY = mario.y;
@@ -940,46 +953,48 @@
                 cGL.playSound(`${assetsDirectory}/sounds/jump.mp3`);
             }
 
-            mario.y += mario.jumpSpeed;
-            mario.jumpSpeed += mario.gravity;
+            if (mario.alive) {
+                mario.y += mario.jumpSpeed;
+                mario.jumpSpeed += mario.gravity;
 
-            // Check for collisions
-            handleCollisions(prevX, prevY);
+                // Check for collisions
+                handleCollisions(prevX, prevY);
 
-            //camera controls
-            if (cGL.keysDown[73]) { // I
-                camera.y += 5;
-            } else if (cGL.keysDown[74]) { // J
-                camera.x += 5;
-            } else if (cGL.keysDown[75]) { // K
-                camera.y -= 5;
-            } else if (cGL.keysDown[76]) { // L
-                camera.x -= 5;
+                //camera controls
+                if (cGL.keysDown[73]) { // I
+                    camera.y += 5;
+                } else if (cGL.keysDown[74]) { // J
+                    camera.x += 5;
+                } else if (cGL.keysDown[75]) { // K
+                    camera.y -= 5;
+                } else if (cGL.keysDown[76]) { // L
+                    camera.x -= 5;
+                }
+
+                const cameraPaddingX = 200; // Horizontal padding from the screen edge
+                const cameraPaddingY = 150; // Vertical padding from the screen edge
+
+                // Horizontal camera movement
+                if (mario.x + camera.x < cameraPaddingX) {
+                    camera.x += cameraPaddingX - (mario.x + camera.x);
+                } else if (mario.x + mario.width + camera.x > camera.width - cameraPaddingX) {
+                    camera.x -= (mario.x + mario.width + camera.x) - (camera.width - cameraPaddingX);
+                }
+
+                // Vertical camera movement
+                if (mario.y + camera.y < cameraPaddingY) {
+                    camera.y += cameraPaddingY - (mario.y + camera.y);
+                } else if (mario.y + mario.height + camera.y > camera.height - cameraPaddingY) {
+                    camera.y -= (mario.y + mario.height + camera.y) - (camera.height - cameraPaddingY);
+                }
+
+                // Prevent the camera from going out of the level bounds
+                const levelWidth = levelMap[0].length * mario.width;
+                const levelHeight = levelMap.length * mario.height;
+
+                camera.x = Math.min(0, Math.max(camera.x, camera.width - levelWidth));
+                camera.y = Math.min(0, Math.max(camera.y, camera.height - levelHeight));
             }
-
-            const cameraPaddingX = 200; // Horizontal padding from the screen edge
-            const cameraPaddingY = 150; // Vertical padding from the screen edge
-
-            // Horizontal camera movement
-            if (mario.x + camera.x < cameraPaddingX) {
-                camera.x += cameraPaddingX - (mario.x + camera.x);
-            } else if (mario.x + mario.width + camera.x > camera.width - cameraPaddingX) {
-                camera.x -= (mario.x + mario.width + camera.x) - (camera.width - cameraPaddingX);
-            }
-
-            // Vertical camera movement
-            if (mario.y + camera.y < cameraPaddingY) {
-                camera.y += cameraPaddingY - (mario.y + camera.y);
-            } else if (mario.y + mario.height + camera.y > camera.height - cameraPaddingY) {
-                camera.y -= (mario.y + mario.height + camera.y) - (camera.height - cameraPaddingY);
-            }
-
-            // Prevent the camera from going out of the level bounds
-            const levelWidth = levelMap[0].length * mario.width;
-            const levelHeight = levelMap.length * mario.height;
-
-            camera.x = Math.min(0, Math.max(camera.x, camera.width - levelWidth));
-            camera.y = Math.min(0, Math.max(camera.y, camera.height - levelHeight));
 
             try {
                 if (cGL.buttons.editPlayLevelButton.pressed) {
@@ -1633,7 +1648,7 @@
             }
             if (mario.visible) {
                 if (mario.deathAnimation) {
-                    cGL.drawImage(marioDeathSprite, mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+                    cGL.drawImage("marioDeathSprite", mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
                 } else {
                     cGL.drawImage(marioImageId, mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
                 }
