@@ -162,6 +162,7 @@
         var editorEnabled = false;
         var showingEditorHelp = false;
         var canToggleEditorHelp = true;
+        var canExportLevel = true;
 
         var camera = {
             x: 0,
@@ -228,6 +229,48 @@
             }
 
             return clone;
+        }
+
+        function importJSON(callback) {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.style.display = 'none';
+
+            input.addEventListener('change', function(event) {
+                var file = event.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            var json = JSON.parse(e.target.result);
+                            console.log('Imported JSON:', json);
+                            if (typeof callback === 'function') {
+                                callback(json);
+                            }
+                        } catch (err) {
+                            console.error('Error parsing JSON:', err);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
+        }
+
+        function importOnlineLevel(url, callback) {
+            fetch(url)
+                .then(response => response.json())
+                .then(json => {
+                    console.log('Imported online JSON:', json);
+                    callback(json);
+                })
+                .catch(error => {
+                    console.error('Error fetching JSON:', error);
+                });
         }
 
         var entities = [];
@@ -1092,7 +1135,7 @@
                     }
                     setTimeout(function() {
                         canToggleEditorHelp = true;
-                    }, 500)
+                    }, 500);
                 }
             }
 
@@ -1102,6 +1145,40 @@
                     cGL.removeButton("editorControlsX");
                 }
             } catch(err) {}
+
+            if (cGL.buttons.exportLevelButton.pressed && allowPlacing && canExportLevel) {
+                canExportLevel = false;
+                setTimeout(function() {
+                    var json = JSON.stringify(levelMap, null, 2);
+                    var blob = new Blob([json], { type: 'application/json' });
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    r1 = cGL.rng(0, 9);
+                    r2 = cGL.rng(0, 9);
+                    r3 = cGL.rng(0, 9);
+                    r4 = cGL.rng(0, 9);
+                    r5 = cGL.rng(0, 9);
+                    a.download = `level-${r1}${r2}${r3}${r4}${r5}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }, 1000)
+                setTimeout(function() {
+                    canExportLevel = true;
+                }, 2000)
+            }
+
+            if (cGL.buttons.importLevelButton.pressed && allowPlacing && canExportLevel) {
+                canExportLevel = false;
+                setTimeout(function() {
+                    importJSON(function(json) {
+                        levelMap = json;
+                    });
+                }, 1000)
+                setTimeout(function() {
+                    canExportLevel = true;
+                }, 2000)
+            }
         }
 
         canvas.addEventListener('wheel', function(event) {
@@ -1719,6 +1796,7 @@
                 coinsCollected = 0;
                 renderingState = 2; // we will set this to 1 for level select later
                 cGL.removeButton("playButton");
+                cGL.removeButton("onlineLevelPlayButton");
                 if (cGL.mobile) {
                     cGL.removeButton("fakeSoundButton");
                 }
@@ -1729,6 +1807,7 @@
                 if (cGL.buttons.editStartButton.pressed) {
                     cGL.removeButton("editStartButton");
                     cGL.removeButton("playButton");
+                    cGL.removeButton("onlineLevelPlayButton");
                     if (cGL.mobile) {
                         cGL.removeButton("fakeSoundButton");
                     }
@@ -1736,10 +1815,34 @@
                     renderingState = 3;
                     cGL.addButton("editPlayLevelButton", 0, 60, 60, 40, true, "Play!");
                     cGL.addButton("editorHelpButton", 70, 60, 40, 40, true, "?");
+                    cGL.addButton("exportLevelButton", 0, 110, 110, 40, true, "Export");
+                    cGL.addButton("importLevelButton", 0, 160, 110, 40, true, "Import");
+                    cGL.stopBackgroundMusic();
                     setTimeout(function() {allowPlacing = true;}, 1000);
                 }
             }
             catch(err) {}
+            if (cGL.buttons.onlineLevelPlayButton.pressed) {
+                entities = [];
+                originalLevelMap = deepCloneArray(levelMap);
+                mario.x = spawnPoint.x;
+                mario.y = spawnPoint.y;
+                lives = startingLives;
+                coinsCollected = 0;
+                importOnlineLevel(prompt("Enter the url"), function(json) {
+                    levelMap = [[0]];
+                    renderingState = 2; // e
+                    cGL.removeButton("playButton");
+                    cGL.removeButton("onlineLevelPlayButton");
+                    if (cGL.mobile) {
+                        cGL.removeButton("fakeSoundButton");
+                    }
+                    cGL.removeButton("editStartButton");
+                    levelMap = json;
+                    cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                });
+
+            }
             if (cGL.keysDown[69]) { // E
                 cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), (canvas.height / 8 * 7) + 50, 100, 40, true, "Edit");
             }
@@ -1801,6 +1904,7 @@
                     if (cGL.mobile) {
                         cGL.addButton("fakeSoundButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound");
                     }
+                    cGL.addButton("onlineLevelPlayButton", (canvas.width / 2) - (100 /2) - 120, canvas.height / 4 * 3, 100, 40, true, "Import Online Level!");
                     renderingState = 0;
                     setTimeout(function() {
                         cGL.startBackgroundMusic(`${assetsDirectory}/sounds/title_music.mp3`);
