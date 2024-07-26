@@ -36,6 +36,8 @@
             desktopFix = 9999999;
         }
 
+        var playedStartupCoinSound = false;
+
         // Example coordinates and sizes for buttons
         const buttonWidth = 300;
         const buttonHeight = 150;
@@ -79,7 +81,8 @@
             `${assetsDirectory}/Mario_Big_Left_Walk_2.png`,
             `${assetsDirectory}/Mario_Big_Left_Jumping.png`
         ];
-        var renderingState = 0;
+        var renderingState = -1;
+        cGL.loadImage("startup", `${assetsDirectory}/startup.png`);
         cGL.loadImage("title", `${assetsDirectory}/Title.png`);
         cGL.loadImage("editorControls", `${assetsDirectory}/editorControls.png`);
         marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
@@ -152,6 +155,7 @@
             cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
         }
 
+        var startScreenOpacity = 1.0;
         var mouseBlockPos = "0, 0";
         var editorCurrentBlock = 1;
         var allowPlacing = false;
@@ -1701,10 +1705,6 @@
             cGL.drawImage(`block${editorCurrentBlock}`, (Math.floor(cGL.mousePos.x/64) + ((camera.x / 64) % 1)) * 64, (Math.floor(cGL.mousePos.y/64) + ((camera.y / 64) % 1)) * 64, 64, 64);
         }
 
-        cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!");
-        
-        cGL.addButton("fakeSoundButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound");
-
         function renderTitle() {
             cGL.drawImage("title", (canvas.width / 2) - (352 / 2), canvas.height / 4, 352, 286);
         }
@@ -1719,7 +1719,9 @@
                 coinsCollected = 0;
                 renderingState = 2; // we will set this to 1 for level select later
                 cGL.removeButton("playButton");
-                cGL.removeButton("fakeSoundButton");
+                if (cGL.mobile) {
+                    cGL.removeButton("fakeSoundButton");
+                }
                 cGL.removeButton("editStartButton");
                 cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
             }
@@ -1727,7 +1729,9 @@
                 if (cGL.buttons.editStartButton.pressed) {
                     cGL.removeButton("editStartButton");
                     cGL.removeButton("playButton");
-                    cGL.removeButton("fakeSoundButton");
+                    if (cGL.mobile) {
+                        cGL.removeButton("fakeSoundButton");
+                    }
                     editorEnabled = true;
                     renderingState = 3;
                     cGL.addButton("editPlayLevelButton", 0, 60, 60, 40, true, "Play!");
@@ -1774,6 +1778,34 @@
                 }
             } else if (renderingState == 4) {
                 renderDeathScreen();
+            // start screen
+            } else if (renderingState == -1) {
+                cGL.drawImage("startup", (canvas.width / 2) - 640, (canvas.height / 2) - 360, 1280, 720);
+                if (cGL.mouseDown || cGL.keyDown) {
+                    setTimeout(function() {
+                        if (!playedStartupCoinSound) {
+                            playedStartupCoinSound = true;
+                            cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            setTimeout(function() {
+                                renderingState = -2;
+                            }, 500);
+                        }
+                    }, 200);
+                }
+            // start screen fade animation
+            } else if (renderingState == -2) {
+                cGL.drawImage("startup", (canvas.width / 2) - 640, (canvas.height / 2) - 360, 1280, 720, startScreenOpacity);
+                startScreenOpacity -= 0.01;
+                if (startScreenOpacity <= 0.02) {
+                    cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!");
+                    if (cGL.mobile) {
+                        cGL.addButton("fakeSoundButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound");
+                    }
+                    renderingState = 0;
+                    setTimeout(function() {
+                        cGL.startBackgroundMusic(`${assetsDirectory}/sounds/title_music.mp3`);
+                    }, 1000);
+                }
             }
             if (cGL.keysDown[77]) {
                 cGL.drawText(`mousePos: (${cGL.mousePos.x}, ${cGL.mousePos.y})`, canvas.width / 2, canvas.height / 2, "24px '8bit'", "white", "center", "top");
