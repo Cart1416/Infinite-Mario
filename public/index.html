@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mario Infinite</title>
+    <style>
+        @font-face {
+            font-family: '8bit';
+            src: url('http://ahf2139.pythonanywhere.com/images/marioimages/8bit.ttf');
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="center">
+        <canvas id="canvas" width="1280" height="720" style="border: none; margin: none;"></canvas>
+    </div>
+    <script src=" https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js "></script>
+    <script src="https://ahf2139.pythonanywhere.com/cartGameLibrary.js"></script>
+    <script>
+        const assetsDirectory = "https://ahf2139.pythonanywhere.com/images/marioimages";
+        const levelServer = ""; // blank is the current server
+        cGL.initialize("canvas");
+        canvas.width = window.innerWidth - 10;
+        canvas.height = window.innerHeight - 15;
+
+        var desktopFix = 0;
+        
+        if (cGL.mobile) {
+            desktopFix = 0;
+        } else {
+            desktopFix = 9999999;
+        }
+
+        username = "";
+
+        if (cGL.loadData("username") != null) {
+            username = cGL.loadData("username");
+        } else {
+            randomName = cGL.rng(0, 6942);
+            cGL.saveData("username", `Player-${randomName}`);
+            username = `Player-${randomName}`;
+        }
+
+        var playedStartupCoinSound = false;
+
+        // Example coordinates and sizes for buttons
+        const buttonWidth = 300;
+        const buttonHeight = 150;
+        const buttonPadding = 20;
+
+        // Add left button
+        cGL.addButton("leftButton", buttonPadding + desktopFix, canvas.height - buttonHeight - buttonPadding + desktopFix, buttonWidth, buttonHeight, true, "Left");
+
+        // Add right button
+        cGL.addButton("rightButton", buttonPadding + buttonWidth + buttonPadding + desktopFix, canvas.height - buttonHeight - buttonPadding + desktopFix, buttonWidth, buttonHeight, true, "Right");
+
+        // Add jump button
+        cGL.addButton("jumpButton", canvas.width - buttonWidth - buttonPadding + desktopFix, canvas.height - buttonHeight - buttonPadding, buttonWidth, buttonHeight, true, "Jump");
+
+        const marioRightImgs = [
+            `${assetsDirectory}/Mario_Small.png`,
+            `${assetsDirectory}/Mario_Small_Walk_0.png`,
+            `${assetsDirectory}/Mario_Small_Walk_1.png`,
+            `${assetsDirectory}/Mario_Small_Walk_2.png`,
+            `${assetsDirectory}/Mario_Small_Jumping.png`
+        ];
+        const marioLeftImgs = [
+            `${assetsDirectory}/Mario_Small_Left.png`,
+            `${assetsDirectory}/Mario_Small_Left_Walk_0.png`,
+            `${assetsDirectory}/Mario_Small_Left_Walk_1.png`,
+            `${assetsDirectory}/Mario_Small_Left_Walk_2.png`,
+            `${assetsDirectory}/Mario_Small_Left_Jumping.png`
+        ];
+        const marioBigRightImgs = [
+            `${assetsDirectory}/Mario_Big.png`,
+            `${assetsDirectory}/Mario_Big_Walk_0.png`,
+            `${assetsDirectory}/Mario_Big_Walk_1.png`,
+            `${assetsDirectory}/Mario_Big_Walk_2.png`,
+            `${assetsDirectory}/Mario_Big_Jumping.png`
+        ];
+        const marioBigLeftImgs = [
+            `${assetsDirectory}/Mario_Big_Left.png`,
+            `${assetsDirectory}/Mario_Big_Left_Walk_0.png`,
+            `${assetsDirectory}/Mario_Big_Left_Walk_1.png`,
+            `${assetsDirectory}/Mario_Big_Left_Walk_2.png`,
+            `${assetsDirectory}/Mario_Big_Left_Jumping.png`
+        ];
+        var renderingState = -1;
+        cGL.loadImage("startup", `${assetsDirectory}/startup.png`);
+        cGL.loadImage("title", `${assetsDirectory}/Title.png`);
+        cGL.loadImage("editorControls", `${assetsDirectory}/editorControls.png`);
+        marioRightImgs.forEach((img, index) => cGL.loadImage(`marioRight${index}`, img));
+        marioLeftImgs.forEach((img, index) => cGL.loadImage(`marioLeft${index}`, img));
+        marioBigRightImgs.forEach((img, index) => cGL.loadImage(`marioBigRight${index}`, img));
+        marioBigLeftImgs.forEach((img, index) => cGL.loadImage(`marioBigLeft${index}`, img));
+        cGL.loadImage("marioDeathSprite", `${assetsDirectory}/Mario_Death.png`);
+        cGL.loadImage("marioSmallFlag", `${assetsDirectory}/Mario_Small_Flag.png`);
+        cGL.loadImage("marioBigFlag", `${assetsDirectory}/Mario_Big_Flag.png`);
+        blockTypes = 17;
+        cGL.loadImage("Goomba", `${assetsDirectory}/entities/Goomba.png`);
+        cGL.loadImage("Goomba1", `${assetsDirectory}/entities/Goomba1.png`);
+        cGL.loadImage("Mushroom", `${assetsDirectory}/entities/Mushroom.png`);
+        cGL.loadImage("Koopa", `${assetsDirectory}/entities/Koopa.png`);
+        cGL.loadImage("Koopa1", `${assetsDirectory}/entities/Koopa1.png`);
+        cGL.loadImage("KoopaRight", `${assetsDirectory}/entities/KoopaRight.png`);
+        cGL.loadImage("KoopaRight1", `${assetsDirectory}/entities/KoopaRight1.png`);
+        cGL.loadImage("Shell", `${assetsDirectory}/entities/Shell.png`);
+
+        // Define your level map
+        var levelMap = [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 2, 10, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 9, 9, 9, 0, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        var originalLevelMap = [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 2, 10, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 9, 9, 9, 0, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        var backgroundMusic = "ground_music.mp3";
+        var backgroundColor = "#9494ff";
+        var spawnPoint = {x: 64, y: 64 * 3}
+        var startingLives = 5;
+        var currentLevelAuthor = "";
+        var currentLevelName = "";
+
+        var gamePadAvailable = false;
+        var gamePadPressed = false;
+        var keyboardPressed = false;
+        window.addEventListener("gamepadconnected", (e) => {
+            gamePadAvailable = true;
+        });
+        window.addEventListener("gamepaddisconnected", (e) => {
+            gamePadAvailable = false;
+        });
+        const userAgent = navigator.userAgent;
+
+        // Load block textures
+        const blockTextures = [];
+        for (let i = 0; i < blockTypes; i++) {
+            cGL.loadImage(`block${i}`, `${assetsDirectory}/blocks/${i}.png`);
+        }
+
+        var startScreenOpacity = 1.0;
+        var mouseBlockPos = "0, 0";
+        var editorCurrentBlock = 1;
+        var allowPlacing = false;
+        var editorEnabled = false;
+        var showingEditorHelp = false;
+        var canToggleEditorHelp = true;
+        var canExportLevel = true;
+        var canChangeUsername = true;
+
+        var camera = {
+            x: 0,
+            y: 0,
+            width: canvas.width,
+            height: canvas.height
+        };
+
+        var cameraBounds = {
+            left: 200,   // When Mario's x is less than this, move the camera left
+            right: 600,  // When Mario's x is greater than this, move the camera right
+            top: 150,    // When Mario's y is less than this, move the camera up
+            bottom: 450  // When Mario's y is greater than this, move the camera down
+        };
+
+        var mario = {
+            x: 64,
+            y: 64 * 3,
+            width: 32 * 2,
+            height: 64 * 2,
+            speed: 5,
+            direction: 'right',
+            frame: 0,
+            frameCount: 4,
+            animationSpeed: 10,
+            frameTimer: 0,
+            jumping: false,
+            jumpSpeed: 0,
+            jumpTimer: 0,
+            gravity: 1,
+            groundLevel: canvas.height - 128,
+            powerUp: 0,
+            prevX: 0,
+            prevY: 0,
+            canJump: true,
+            canHighJump: true,
+            leftRightDisabled: false,
+            visible: true,
+            alive: true,
+            canMove: true,
+            deathAnimation: false,
+            deathAnimFrame: 0,
+            winAnimation: 0
+        };
+        mario.x = spawnPoint.x;
+        mario.y = spawnPoint.y;
+        var coinsCollected = 0;
+        var lives = 5;
+
+        function deepCloneArray(arr) {
+            if (!Array.isArray(arr)) {
+                throw new Error('Input is not an array');
+            }
+
+            let clone = [];
+
+            for (let i = 0; i < arr.length; i++) {
+                if (Array.isArray(arr[i])) {
+                    clone[i] = deepCloneArray(arr[i]); // Recursively clone nested arrays
+                } else if (typeof arr[i] === 'object' && arr[i] !== null) {
+                    clone[i] = deepCloneObject(arr[i]); // Handle nested objects
+                } else {
+                    clone[i] = arr[i]; // Primitive types
+                }
+            }
+
+            return clone;
+        }
+
+        function importJSON(callback) {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.style.display = 'none';
+
+            input.addEventListener('change', function(event) {
+                var file = event.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            var json = JSON.parse(e.target.result);
+                            console.log('Imported JSON:', json);
+                            if (typeof callback === 'function') {
+                                callback(json);
+                            }
+                        } catch (err) {
+                            console.error('Error parsing JSON:', err);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
+        }
+
+        function importOnlineLevel(levelID, callback) {
+            fetch(`${levelServer}/get_level/${levelID}`)
+            .then(response => {
+                if (!response.ok) {
+                    alert("level not found")
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Level data:', data);
+                callback(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            });
+        }
+
+        var entities = [];
+
+        function addGoomba(x, y) {
+            var goombaTemplate = {
+                id: 1, // id of goomba is 1
+                x: x,
+                y: y,
+                width: mario.width,
+                height: mario.width,
+                speed: 2,
+                frame: 0,
+                frameCount: 1, // 2 frames
+                animationSpeed: 30,
+                frameTimer: 0,
+                gravity: 5,
+                direction: 'left',
+                update: function() {
+                    let prevX = this.x;
+                    let prevY = this.y;
+                    if (this.direction == 'left') {
+                        this.x -= this.speed;
+                    }
+                    if (this.direction == 'right') {
+                        this.x += this.speed;
+                    }
+                    this.frameTimer++;
+                    if (this.frameTimer >= this.animationSpeed) {
+                        if (this.frame >= this.frameCount) {
+                            this.frame = 0;
+                        } else {
+                            ++this.frame;
+                        }
+                        this.frameTimer = 0;
+                    }
+                    this.y += this.gravity;
+                    const blockSize = this.width;
+                    const hitboxHeight = this.height;
+                    const hitboxOffset = this.height - 64;
+                    const marioTop = this.y + hitboxOffset;
+                    const marioBottom = this.y + hitboxOffset + hitboxHeight;
+                    const marioLeft = this.x;
+                    const marioRight = this.x + this.width;
+                    const prevBottom = prevY + hitboxOffset + hitboxHeight;
+                    const prevTop = prevY + hitboxOffset;
+                    const prevLeft = prevX;
+                    const prevRight = prevX + this.width;
+                    for (let y = 0; y < levelMap.length; y++) {
+                        for (let x = 0; x < levelMap[y].length; x++) {
+                            const blockType = levelMap[y][x];
+                            if ((blockType != 0) && (blockType != 4) && (blockType != 7) && (blockType != 9) && (blockType != 10) && (blockType != 14) && (blockType != 15) && (blockType != 16)) {
+                                const blockX = x * blockSize;
+                                const blockY = y * blockSize;
+                                const blockTop = blockY;
+                                const blockBottom = blockY + blockSize;
+                                const blockLeft = blockX;
+                                const blockRight = blockX + blockSize;
+
+                                if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                                    // Collision from top
+                                    if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                        this.y = blockTop - hitboxHeight - hitboxOffset;
+                                    }
+                                    // Collision from bottom
+                                    else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                        this.y = blockBottom - hitboxOffset;
+                                    }
+                                    // Collision from left
+                                    else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                        this.x = blockLeft - this.width;
+                                        this.direction = 'left';
+                                    }
+                                    // Collision from right
+                                    else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                        this.x = blockRight;
+                                        this.direction = 'right';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    const blockX = mario.x;
+                    const blockY = mario.y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + mario.height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + mario.width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            die();
+                        }
+                        // Collision from bottom
+                        // mario collides with our top stomping us
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            entities.splice(i, 1);
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            die();
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            die();
+                        }
+                    }
+                },
+                render: function() {
+                    if (this.frame == 0) {
+                        cGL.drawImage("Goomba", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                    } else if (this.frame == 1) {
+                        cGL.drawImage("Goomba1", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                    }
+                }
+            };
+            entities.push(goombaTemplate);
+        }
+
+        function addMushroom(x, y) {
+            var mushroomTemplate = {
+                id: 2, // id of mushroom is 2
+                x: x,
+                y: y,
+                width: mario.width,
+                height: mario.width,
+                speed: 2,
+                frame: 0,
+                frameCount: 0, // 1 frame
+                animationSpeed: 30,
+                frameTimer: 0,
+                gravity: 5,
+                direction: 'right',
+                update: function() {
+                    let prevX = this.x;
+                    let prevY = this.y;
+                    if (this.direction == 'left') {
+                        this.x -= this.speed;
+                    }
+                    if (this.direction == 'right') {
+                        this.x += this.speed;
+                    }
+                    this.frameTimer++;
+                    if (this.frameTimer >= this.animationSpeed) {
+                        if (this.frame >= this.frameCount) {
+                            this.frame = 0;
+                        } else {
+                            ++this.frame;
+                        }
+                        this.frameTimer = 0;
+                    }
+                    this.y += this.gravity;
+                    const blockSize = this.width;
+                    const hitboxHeight = this.height;
+                    const hitboxOffset = this.height - 64;
+                    const marioTop = this.y + hitboxOffset;
+                    const marioBottom = this.y + hitboxOffset + hitboxHeight;
+                    const marioLeft = this.x;
+                    const marioRight = this.x + this.width;
+                    const prevBottom = prevY + hitboxOffset + hitboxHeight;
+                    const prevTop = prevY + hitboxOffset;
+                    const prevLeft = prevX;
+                    const prevRight = prevX + this.width;
+                    for (let y = 0; y < levelMap.length; y++) {
+                        for (let x = 0; x < levelMap[y].length; x++) {
+                            const blockType = levelMap[y][x];
+                            if ((blockType != 0) && (blockType != 4) && (blockType != 7) && (blockType != 9) && (blockType != 10) && (blockType != 14) && (blockType != 15) && (blockType != 16)) {
+                                const blockX = x * blockSize;
+                                const blockY = y * blockSize;
+                                const blockTop = blockY;
+                                const blockBottom = blockY + blockSize;
+                                const blockLeft = blockX;
+                                const blockRight = blockX + blockSize;
+                                //this is OUR collision so we know how to move
+                                if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                                    // Collision from top
+                                    if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                        this.y = blockTop - hitboxHeight - hitboxOffset;
+                                    }
+                                    // Collision from bottom
+                                    else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                        this.y = blockBottom - hitboxOffset;
+                                    }
+                                    // Collision from left
+                                    else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                        this.x = blockLeft - this.width;
+                                        this.direction = 'left';
+                                    }
+                                    // Collision from right
+                                    else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                        this.x = blockRight;
+                                        this.direction = 'right';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    const blockX = mario.x;
+                    const blockY = mario.y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + mario.height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + mario.width;
+                    //this is when we run into mario
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            entities.splice(entities.indexOf(this), 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                        // Collision from bottom
+                        // mario collides with our top stomping us
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            entities.splice(entities.indexOf(this), 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            entities.splice(entities.indexOf(this), 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            entities.splice(entities.indexOf(this), 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                    }
+                },
+                render: function() {
+                    if (this.frame == 0) {
+                        cGL.drawImage("Mushroom", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                    }
+                }
+            };
+            entities.push(mushroomTemplate);
+        }
+
+        function addKoopa(x, y) {
+            var koopaTemplate = {
+                id: 3, // id of koopa is 3
+                x: x,
+                y: y,
+                width: mario.width,
+                height: 96,
+                speed: 2,
+                frame: 0,
+                frameCount: 1, // 2 frames
+                animationSpeed: 30,
+                frameTimer: 0,
+                gravity: 5,
+                direction: 'left',
+                update: function() {
+                    let prevX = this.x;
+                    let prevY = this.y;
+                    if (this.direction == 'left') {
+                        this.x -= this.speed;
+                    }
+                    if (this.direction == 'right') {
+                        this.x += this.speed;
+                    }
+                    this.frameTimer++;
+                    if (this.frameTimer >= this.animationSpeed) {
+                        if (this.frame >= this.frameCount) {
+                            this.frame = 0;
+                        } else {
+                            ++this.frame;
+                        }
+                        this.frameTimer = 0;
+                    }
+                    this.y += this.gravity;
+                    const blockSize = this.width;
+                    const hitboxHeight = this.height;
+                    const hitboxOffset = this.height - this.height;
+                    const marioTop = this.y + hitboxOffset;
+                    const marioBottom = this.y + hitboxOffset + hitboxHeight;
+                    const marioLeft = this.x;
+                    const marioRight = this.x + this.width;
+                    const prevBottom = prevY + hitboxOffset + hitboxHeight;
+                    const prevTop = prevY + hitboxOffset;
+                    const prevLeft = prevX;
+                    const prevRight = prevX + this.width;
+                    for (let y = 0; y < levelMap.length; y++) {
+                        for (let x = 0; x < levelMap[y].length; x++) {
+                            const blockType = levelMap[y][x];
+                            if ((blockType != 0) && (blockType != 4) && (blockType != 7) && (blockType != 9) && (blockType != 10) && (blockType != 14) && (blockType != 15) && (blockType != 16)) {
+                                const blockX = x * blockSize;
+                                const blockY = y * blockSize;
+                                const blockTop = blockY;
+                                const blockBottom = blockY + blockSize;
+                                const blockLeft = blockX;
+                                const blockRight = blockX + blockSize;
+
+                                if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                                    // Collision from top
+                                    if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                        this.y = blockTop - hitboxHeight - hitboxOffset;
+                                    }
+                                    // Collision from bottom
+                                    else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                        this.y = blockBottom - hitboxOffset;
+                                    }
+                                    // Collision from left
+                                    else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                        this.x = blockLeft - this.width;
+                                        this.direction = 'left';
+                                    }
+                                    // Collision from right
+                                    else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                        this.x = blockRight;
+                                        this.direction = 'right';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    const blockX = mario.x;
+                    const blockY = mario.y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + mario.height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + mario.width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            die();
+                        }
+                        // Collision from bottom
+                        // mario collides with our top stomping us
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            const x = blockX;
+                            const y = blockY + 8;
+                            entities.splice(i, 1);
+                            addShell(x, y);
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            die();
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            die();
+                        }
+                    }
+                },
+                render: function() {
+                    if (this.frame == 0) {
+                        if (this.direction == "left") {
+                            cGL.drawImage("Koopa", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                        } else {cGL.drawImage("KoopaRight", this.x + camera.x, this.y + camera.y, this.width, this.height);}
+                    } else if (this.frame == 1) {
+                        if (this.direction == "left") {
+                            cGL.drawImage("Koopa1", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                        } else {cGL.drawImage("KoopaRight1", this.x + camera.x, this.y + camera.y, this.width, this.height);}
+                    }
+                }
+            };
+            entities.push(koopaTemplate);
+        }
+
+        function addShell(x, y) {
+            var shellTemplate = {
+                id: 4, // id of shell is 4
+                x: x,
+                y: y,
+                width: mario.width,
+                height: mario.width,
+                speed: 10,
+                frame: 0,
+                frameCount: 0, // 1 frame
+                animationSpeed: 30,
+                frameTimer: 0,
+                gravity: 5,
+                direction: 'right',
+                moving: false,
+                update: function() {
+                    let prevX = this.x;
+                    let prevY = this.y;
+                    if (this.moving) {
+                        if (this.direction == 'left') {
+                            this.x -= this.speed;
+                        }
+                        if (this.direction == 'right') {
+                            this.x += this.speed;
+                        }
+                    }
+                    this.frameTimer++;
+                    if (this.frameTimer >= this.animationSpeed) {
+                        if (this.frame >= this.frameCount) {
+                            this.frame = 0;
+                        } else {
+                            ++this.frame;
+                        }
+                        this.frameTimer = 0;
+                    }
+                    this.y += this.gravity;
+                    const blockSize = this.width;
+                    const hitboxHeight = this.height;
+                    const hitboxOffset = this.height - this.height;
+                    const marioTop = this.y + hitboxOffset;
+                    const marioBottom = this.y + hitboxOffset + hitboxHeight;
+                    const marioLeft = this.x;
+                    const marioRight = this.x + this.width;
+                    const prevBottom = prevY + hitboxOffset + hitboxHeight;
+                    const prevTop = prevY + hitboxOffset;
+                    const prevLeft = prevX;
+                    const prevRight = prevX + this.width;
+                    for (let y = 0; y < levelMap.length; y++) {
+                        for (let x = 0; x < levelMap[y].length; x++) {
+                            const blockType = levelMap[y][x];
+                            if ((blockType != 0) && (blockType != 4) && (blockType != 7) && (blockType != 9) && (blockType != 10) && (blockType != 14) && (blockType != 15) && (blockType != 16)) {
+                                const blockX = x * blockSize;
+                                const blockY = y * blockSize;
+                                const blockTop = blockY;
+                                const blockBottom = blockY + blockSize;
+                                const blockLeft = blockX;
+                                const blockRight = blockX + blockSize;
+
+                                if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                                    // Collision from top
+                                    if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                        this.y = blockTop - hitboxHeight - hitboxOffset;
+                                    }
+                                    // Collision from bottom
+                                    else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                        this.y = blockBottom - hitboxOffset;
+                                    }
+                                    // Collision from left
+                                    else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                        this.x = blockLeft - this.width;
+                                        this.direction = 'left';
+                                    }
+                                    // Collision from right
+                                    else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                        this.x = blockRight;
+                                        this.direction = 'right';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (true) {
+                        const blockX = mario.x;
+                        const blockY = mario.y;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + mario.height;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + mario.width;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                if (this.moving) {
+                                    die();
+                                }
+                            }
+                            // Collision from bottom
+                            // mario collides with our top stomping us
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                if (this.moving) {
+                                    this.moving = false;
+                                } else {this.moving = true;}
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                if (this.moving) {
+                                    die();
+                                }
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                if (this.moving) {
+                                    die();
+                                }
+                            }
+                        }
+                    }
+
+                    //this will make the shell kill anything it touches
+                    if (this.moving) {
+                        for (let i = 0; i < entities.length; i++) {
+                            const blockX = entities[i].x;
+                            const blockY = entities[i].y;
+                            const blockTop = blockY;
+                            const blockBottom = blockY + entities[i].height;
+                            const blockLeft = blockX;
+                            const blockRight = blockX + entities[i].width;
+                            const entityType = entities[i].id;
+                            if (entityType == 1 || entityType == 3 || entityType == 4) {
+                                // Collision from top
+                                if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                    entities.splice(i, 1);
+                                }
+                                // Collision from bottom
+                                // mario collides with our top stomping us
+                                else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                    entities.splice(i, 1);
+                                }
+                                // Collision from left
+                                else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                    entities.splice(i, 1);
+                                }
+                                // Collision from right
+                                else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                    entities.splice(i, 1);
+                                }
+                            }
+                        }
+                    }
+                },
+                render: function() {
+                    if (this.frame == 0) {
+                        cGL.drawImage("Shell", this.x + camera.x, this.y + camera.y, this.width, this.height);
+                    }
+                }
+            };
+            entities.push(shellTemplate);
+        }
+
+        function die() {
+            if (mario.alive) {
+                mario.alive = false;
+                //mario.visible = false;
+                mario.canMove = false;
+                mario.deathAnimation = true;
+                cGL.stopBackgroundMusic();
+                cGL.playSound(`${assetsDirectory}/sounds/death.mp3`);
+                --lives;
+                setTimeout(function() {
+                    renderingState = 4;
+                    setTimeout(function() {
+                        entities = [];
+                        levelMap = deepCloneArray(originalLevelMap);
+                        mario.x = spawnPoint.x;
+                        mario.y = spawnPoint.y;
+                        if (editorEnabled) {
+                            mario.deathAnimation = false;
+                            renderingState = 3;
+                            mario.alive = true;
+                            //mario.visible = true;
+                            mario.canMove = true;
+                            mario.deathAnimFrame = 0;
+                        } else {
+                            mario.deathAnimation = false;
+                            renderingState = 2;
+                            mario.alive = true;
+                            //mario.visible = true;
+                            mario.canMove = true;
+                            cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                            mario.deathAnimFrame = 0;
+                        }
+                    }, 3000)
+                }, 5000)
+            }
+        }
+
+        function game() {
+            for (let i = 0; i < entities.length; i++) {
+                entities[i].update();
+            }
+            if (mario.deathAnimation) {
+                ++mario.deathAnimFrame;
+                if (mario.deathAnimFrame < 20) {
+                    mario.y -= 5;
+                } else {
+                    mario.y += 5;
+                }
+                const max = 250;
+                console.log(mario.deathAnimFrame);
+            }
+            let prevX = mario.x;
+            let prevY = mario.y;
+            mario.prevX = prevX;
+            mario.prevY = prevY;
+            const gamePads = navigator.getGamepads();
+            if (mario.canMove && mario.winAnimation == 0) {
+                if (gamePadAvailable && !keyboardPressed) {
+                    if (userAgent.indexOf("Chrome") > -1 || userAgent.indexOf("Chromium") > -1) {
+                        // chrome is stupid and I decided to be lazy
+                        for (let i = 0; i < 1; i++) {
+                            if (gamePads[i].buttons[14].pressed) { // Left arrow
+                                mario.x -= mario.speed;
+                                mario.direction = 'left';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else if (gamePads[i].buttons[15].pressed) { // Right arrow
+                                mario.x += mario.speed;
+                                mario.direction = 'right';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else {
+                                mario.frame = 0;
+                                gamePadPressed = false;
+                            }
+                            if (gamePads[i].buttons[0].pressed) { // A button
+                                if (!mario.jumping) {
+                                    mario.jumping = true;
+                                    mario.jumpSpeed = -15;
+                                }
+                                ++mario.jumpTimer;
+                                gamePadPressed = true;
+                            } else {
+                                mario.jumpTimer = 0;
+                                gamePadPressed = false;
+                            }
+                            if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
+                                mario.jumping = true;
+                                mario.jumpSpeed = -15;
+                                ++mario.jumpTimer;
+                            }
+                        }
+                    } else if (userAgent.indexOf("Firefox") > -1) {
+                        for (let i = 0; i < gamePads.length; i++) {
+                            if (gamePads[i].buttons[15].pressed) { // Left arrow
+                                mario.x -= mario.speed;
+                                mario.direction = 'left';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else if (gamePads[i].buttons[16].pressed) { // Right arrow
+                                mario.x += mario.speed;
+                                mario.direction = 'right';
+                                mario.frameTimer++;
+                                if (mario.frameTimer >= mario.animationSpeed) {
+                                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                                    mario.frameTimer = 0;
+                                }
+                                gamePadPressed = true;
+                            } else {
+                                mario.frame = 0;
+                                gamePadPressed = false;
+                            }
+                            if (gamePads[i].buttons[0].pressed) { // A button
+                                if (!mario.jumping) {
+                                    mario.jumping = true;
+                                    mario.jumpSpeed = -15;
+                                }
+                                ++mario.jumpTimer;
+                                gamePadPressed = true;
+                            } else {
+                                mario.jumpTimer = 0;
+                                gamePadPressed = false;
+                            }
+                            if (gamePads[i].buttons[0].pressed && mario.jumpTimer == 8) { // A button
+                                mario.jumping = true;
+                                mario.jumpSpeed = -15;
+                                ++mario.jumpTimer;
+                            }
+                        }
+                    }
+                }
+                if (!gamePadPressed) {
+                    if ((cGL.keysDown[37] || cGL.buttons.leftButton.pressed) && !mario.leftRightDisabled) { // Left arrow
+                        mario.x -= mario.speed;
+                        mario.direction = 'left';
+                        mario.frameTimer++;
+                        if (mario.frameTimer >= mario.animationSpeed) {
+                            mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                            mario.frameTimer = 0;
+                        }
+                        keyboardPressed = true;
+                    } else if ((cGL.keysDown[39] || cGL.buttons.rightButton.pressed) && !mario.leftRightDisabled) { // Right arrow
+                        mario.x += mario.speed;
+                        mario.direction = 'right';
+                        mario.frameTimer++;
+                        if (mario.frameTimer >= mario.animationSpeed) {
+                            mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                            mario.frameTimer = 0;
+                        }
+                        keyboardPressed = true;
+                    } else {
+                        mario.frame = 0;
+                        keyboardPressed = false;
+                    }
+
+                    if ((cGL.keysDown[38] || cGL.keysDown[32] || cGL.buttons.jumpButton.pressed)) { // Up arrow or space bar
+                        if (!mario.jumping && mario.canJump) {
+                            console.log("1")
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        if (mario.jumpTimer == 8 && mario.jumping && mario.canJump && mario.canHighJump) {
+                            console.log("2");
+                            mario.canHighJump = false;
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                            ++mario.jumpTimer;
+                            keyboardPressed = true;
+                            setTimeout(function() {
+                                mario.canHighJump = true;
+                            }, 1000);
+                        }
+                        ++mario.jumpTimer;
+                        keyboardPressed = true;
+                        setTimeout(function() {
+                            mario.canJump = false;
+                        }, 200);
+                        setTimeout(function() {
+                            mario.canJump = true;
+                        }, 1000);
+                    } else {
+                        mario.jumpTimer = 0;
+                    }
+                }
+            }
+
+            if (mario.winAnimation == 2) { // mario walks right
+                mario.x += mario.speed;
+                mario.direction = 'right';
+                mario.frameTimer++;
+                if (mario.frameTimer >= mario.animationSpeed) {
+                    mario.frame = (mario.frame + 1) % (mario.frameCount - 1); // 3 walking frames
+                    mario.frameTimer = 0;
+                }
+                gamePadPressed = true;
+            }
+
+            if (mario.winAnimation == 1) { // mario stands still and falls
+                mario.frame = 0;
+                mario.jumpTimer = 0;
+                mario.gravity = 0.125;
+            }
+
+            if (mario.winAnimation == 0) {
+                mario.gravity = 1;
+            }
+
+            if (mario.jumpTimer == 1) {
+                cGL.playSound(`${assetsDirectory}/sounds/jump.mp3`);
+            }
+
+            if (mario.alive) {
+                mario.y += mario.jumpSpeed;
+                mario.jumpSpeed += mario.gravity;
+
+                handleCollisions(prevX, prevY);
+
+                //camera controls
+                if (cGL.keysDown[73]) { // I
+                    camera.y += 5;
+                } else if (cGL.keysDown[74]) { // J
+                    camera.x += 5;
+                } else if (cGL.keysDown[75]) { // K
+                    camera.y -= 5;
+                } else if (cGL.keysDown[76]) { // L
+                    camera.x -= 5;
+                }
+
+                const cameraPaddingX = 200; // horizontal padding
+                const cameraPaddingY = 150; // vertical padding
+
+                // horizontal
+                if (mario.x + camera.x < cameraPaddingX) {
+                    camera.x += cameraPaddingX - (mario.x + camera.x);
+                } else if (mario.x + mario.width + camera.x > camera.width - cameraPaddingX) {
+                    camera.x -= (mario.x + mario.width + camera.x) - (camera.width - cameraPaddingX);
+                }
+
+                // vertical
+                if (mario.y + camera.y < cameraPaddingY) {
+                    camera.y += cameraPaddingY - (mario.y + camera.y);
+                } else if (mario.y + mario.height + camera.y > camera.height - cameraPaddingY) {
+                    camera.y -= (mario.y + mario.height + camera.y) - (camera.height - cameraPaddingY);
+                }
+
+                const levelWidth = levelMap[0].length * mario.width;
+                const levelHeight = levelMap.length * mario.height;
+
+                camera.x = Math.min(0, Math.max(camera.x, camera.width - levelWidth));
+                camera.y = Math.min(0, Math.max(camera.y, camera.height - levelHeight));
+            }
+
+            try {
+                if (cGL.buttons.editPlayLevelButton.pressed) {
+                    cGL.buttons.editPlayLevelButton.text = "Play!";
+                    allowPlacing = false;
+                    setTimeout(function() {allowPlacing = true;}, 100);
+                    levelMap = deepCloneArray(originalLevelMap);
+                    renderingState = 3;
+                    cGL.stopBackgroundMusic();
+                }
+            } catch(err) {}
+        }
+
+        function changeBlock(x, y, id, recursionDepth = 0) {
+            if (recursionDepth > 5000) {
+                console.error("Max recursion limit reached");
+                alert("Could Not Place Block, please don't make a level this high.");
+                return;
+            }
+
+            try {
+                levelMap[y][x] = id;
+            } catch (err) {
+                if (!levelMap[y]) {
+                    //levelMap[y] = [0];
+                    levelMap[levelMap.length] = [0]
+                }
+                changeBlock(x, y, id, recursionDepth + 1);
+            }
+        }
+
+        function edit() {
+            //camera controls
+            if (cGL.keysDown[87]) { // W
+                camera.y += 5;
+            } else if (cGL.keysDown[65]) { // A
+                camera.x += 5;
+            } else if (cGL.keysDown[83]) { // S
+                camera.y -= 5;
+            } else if (cGL.keysDown[68]) { // D
+                camera.x -= 5;
+            }
+
+            mouseBlockPos = (Math.floor(cGL.mousePos.x/64-camera.x/64)) + ", " + (Math.floor(cGL.mousePos.y/64-camera.y/64));
+            if (cGL.mouseDown && allowPlacing && !cGL.buttons.editPlayLevelButton.pressed) {
+                changeBlock(Math.floor(cGL.mousePos.x/64-camera.x/64), Math.floor(cGL.mousePos.y/64-camera.y/64), editorCurrentBlock);
+            }
+
+            if (cGL.keysDown[57]) { // 9
+                var formattedLevelMap = 'var levelMap = [\n';
+                for (var i = 0; i < levelMap.length; i++) {
+                    formattedLevelMap += '    [' + levelMap[i].join(', ') + ']';
+                    if (i < levelMap.length - 1) {
+                        formattedLevelMap += ',\n';
+                    }
+                }
+                formattedLevelMap += '\n];';
+                var tempTextArea = document.createElement("textarea");
+                tempTextArea.value = formattedLevelMap;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempTextArea);
+
+                console.log("levelMap copied to clipboard!");
+            }
+
+            for (let y = 0; y < levelMap.length; y++) {
+                for (let x = 0; x < levelMap[y].length; x++) {
+                    const blockType = levelMap[y][x];
+                    if ((blockType + "") == "undefined") {
+                        levelMap[y][x] = 0;
+                    }
+                }
+            }
+
+            if (cGL.buttons.editPlayLevelButton.pressed && allowPlacing) {
+                cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                entities = [];
+                originalLevelMap = deepCloneArray(levelMap);
+                mario.x = spawnPoint.x;
+                mario.y = spawnPoint.y;
+                cGL.buttons.editPlayLevelButton.text = "Stop!";
+                setTimeout(function() {renderingState = 2;}, 100);
+            }
+
+            if (cGL.buttons.editorHelpButton.pressed && allowPlacing) {
+                if (canToggleEditorHelp) {
+                    if (showingEditorHelp) {
+                        showingEditorHelp = false;
+                        canToggleEditorHelp = false;
+                        cGL.removeButton("editorControlsX");
+                    } else {
+                        showingEditorHelp = true;
+                        canToggleEditorHelp = false;
+                        cGL.addButton("editorControlsX", (canvas.width / 2) - 400, (canvas.height / 2) - 300, 800, 600, false, "Edit");
+                    }
+                    setTimeout(function() {
+                        canToggleEditorHelp = true;
+                    }, 500);
+                }
+            }
+
+            try {
+                if (cGL.buttons.editorControlsX.pressed && allowPlacing) {
+                    showingEditorHelp = false;
+                    cGL.removeButton("editorControlsX");
+                }
+            } catch(err) {}
+
+            if (cGL.buttons.exportLevelButton.pressed && allowPlacing && canExportLevel) {
+                canExportLevel = false;
+                setTimeout(function() {
+                    var levelName = prompt("Enter the level name:");
+                    var authorName = username;
+                    var json = JSON.stringify({
+                        levelName: levelName,
+                        authorName: authorName,
+                        backgroundMusic: backgroundMusic,
+                        backgroundColor: backgroundColor,
+                        spawnPoint: spawnPoint,
+                        startingLives: startingLives,
+                        levelMap: levelMap
+                    }, null, 2);
+                    var blob = new Blob([json], { type: 'application/json' });
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    //r1 = cGL.rng(0, 9);
+                    //r2 = cGL.rng(0, 9);
+                    //r3 = cGL.rng(0, 9);
+                    //r4 = cGL.rng(0, 9);
+                    //r5 = cGL.rng(0, 9);
+                    //a.download = `level-${r1}${r2}${r3}${r4}${r5}.json`;
+                    a.download = `level-${levelName}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }, 1000)
+                setTimeout(function() {
+                    canExportLevel = true;
+                }, 2000)
+            }
+
+            if (cGL.buttons.importLevelButton.pressed && allowPlacing && canExportLevel) {
+                canExportLevel = false;
+                setTimeout(function() {
+                    importJSON(function(json) {
+                        levelMap = json.levelMap;
+                        backgroundMusic = json.backgroundMusic;
+                        backgroundColor = json.backgroundColor;
+                        spawnPoint = json.spawnPoint;
+                        startingLives = json.startingLives;
+                        currentLevelAuthor = json.authorName;
+                        currentLevelName = json.levelName;
+                    });
+                }, 1000)
+                setTimeout(function() {
+                    canExportLevel = true;
+                }, 2000)
+            }
+
+            if (cGL.buttons.uploadLevelButton.pressed && allowPlacing && canExportLevel) {
+                canExportLevel = false;
+                setTimeout(function() {
+                    var levelName = prompt("Enter the level name:");
+                    var authorName = username;
+                    var json = JSON.stringify({
+                        levelName: levelName,
+                        authorName: authorName,
+                        backgroundMusic: backgroundMusic,
+                        backgroundColor: backgroundColor,
+                        spawnPoint: spawnPoint,
+                        startingLives: startingLives,
+                        levelMap: levelMap
+                    }, null, 2);
+                    var blob = new Blob([json], { type: 'application/json' });
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    var formData = new FormData();
+                    formData.append('file', blob, `level-${levelName}.json`);
+                    fetch(`${levelServer}/upload`, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        alert(data.message);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }, 1000)
+                setTimeout(function() {
+                    canExportLevel = true;
+                }, 2000)
+            }
+        }
+
+        canvas.addEventListener('wheel', function(event) {
+            if (renderingState == 3) {
+                event.preventDefault();
+
+                if (event.deltaY < 0) {
+                    ++editorCurrentBlock;
+                } else if (event.deltaY > 0) {
+                    if (editorCurrentBlock > 0) {
+                        --editorCurrentBlock;
+                    }
+                }
+            }
+        });
+
+        canvas.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+
+            if (renderingState == 3 && allowPlacing) {
+                changeBlock(Math.floor(cGL.mousePos.x/64-camera.x/64), Math.floor(cGL.mousePos.y/64-camera.y/64), 0);
+            }
+        });
+
+        function handleCollisions(prevX, prevY) {
+            const blockSize = mario.width;
+            const hitboxHeight = mario.powerUp === 0 ? mario.height / 2 : mario.height;
+            const hitboxOffset = mario.powerUp === 0 ? mario.height / 2 : 0;
+            const marioTop = mario.y + hitboxOffset;
+            const marioBottom = mario.y + hitboxOffset + hitboxHeight;
+            const marioLeft = mario.x;
+            const marioRight = mario.x + mario.width;
+            const prevBottom = prevY + hitboxOffset + hitboxHeight;
+            const prevTop = prevY + hitboxOffset;
+            const prevLeft = prevX;
+            const prevRight = prevX + mario.width;
+
+            const floorBlocks = [1, 2, 3, 5, 6, 8] // blocks with collision on the top
+
+            for (let y = 0; y < levelMap.length; y++) {
+                for (let x = 0; x < levelMap[y].length; x++) {
+                    const blockType = levelMap[y][x];
+                    if (true) {
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+                        const marioBlockExactX = mario.x / 64;
+                        const marioBlock1X = Math.floor(marioBlockExactX);
+                        const marioBlock2X = Math.ceil(marioBlockExactX);
+                        const marioBlockExactY = mario.y / 64;
+                        const marioBlock1Y = Math.floor(marioBlockExactY) + 2; // under marios feet
+                        const marioBlock2Y = Math.floor(marioBlockExactY) + 2; // under marios feet
+                        thing99 = marioBlock1X + ", " + marioBlock1Y;
+                        try {
+                            if (!floorBlocks.includes(levelMap[marioBlock1Y][marioBlock1X]) && !floorBlocks.includes(levelMap[marioBlock2Y][marioBlock2X]) && !mario.jumping) {
+                                mario.leftRightDisabled = true; //disable right and left movement to uncling from wall
+                            } else {
+                                mario.leftRightDisabled = false; //re enable left and right movement
+                            }
+                        } catch(err) {
+                            console.warn(err.message);
+                        }
+                    }
+                    if (blockType == 1) { //ground
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                                if (mario.winAnimation == 1) {
+                                    mario.winAnimation = 2;
+                                    cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
+                                    setTimeout(function () {
+                                        mario.winAnimation = 0;
+                                    }, 5000);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 2) { //brick
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                                if (mario.winAnimation == 1) {
+                                    mario.winAnimation = 2;
+                                    cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
+                                    setTimeout(function () {
+                                        mario.winAnimation = 0;
+                                    }, 5000);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                                if (mario.powerUp > 0) {
+                                    levelMap[y][x] = 0;
+                                    cGL.playSound(`${assetsDirectory}/sounds/brick_break.mp3`);
+                                }
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 3) { //question block
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                                if (mario.winAnimation == 1) {
+                                    mario.winAnimation = 2;
+                                    cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
+                                    setTimeout(function () {
+                                        mario.winAnimation = 0;
+                                    }, 5000);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 4) { //coin
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                levelMap[y][x] = 0;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                        }
+                    }
+                    if (blockType == 5) { //question block with a coin
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                                if (mario.winAnimation == 1) {
+                                    mario.winAnimation = 2;
+                                    cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
+                                    setTimeout(function () {
+                                        mario.winAnimation = 0;
+                                    }, 5000);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                                levelMap[y][x] = 3;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 6) { //question block with a mushroom
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                                if (mario.winAnimation == 1) {
+                                    mario.winAnimation = 2;
+                                    cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
+                                    setTimeout(function () {
+                                        mario.winAnimation = 0;
+                                    }, 5000);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                                levelMap[y][x] = 3;
+                                above = y - 1;
+                                levelMap[above][x] = 10;
+                                cGL.playSound(`${assetsDirectory}/sounds/powerUpAppear.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 7) { //non moving mushroom
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                levelMap[y][x] = 0;
+                                mario.powerUp = 1;
+                                cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                            }
+                        }
+                    }
+                    if (blockType == 8) { //question block with infinite coins
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                                if (mario.winAnimation == 1) {
+                                    mario.winAnimation = 2;
+                                    cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
+                                    setTimeout(function () {
+                                        mario.winAnimation = 0;
+                                    }, 5000);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                                ++coinsCollected;
+                                cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+                    if (blockType == 9) { //goomba spawn point
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        levelMap[y][x] = 0;
+                        addGoomba(x * blockSize, y * blockSize);
+                    }
+                    if (blockType == 10) { //mushroom spawn point
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        levelMap[y][x] = 0;
+                        addMushroom(x * blockSize, y * blockSize);
+                    }
+                    if (blockType == 11) { //koopa spawn point
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        levelMap[y][x] = 0;
+                        addKoopa(x * blockSize, y * blockSize - blockSize);
+                    }
+                    if (blockType == 12) { //shell spawn point
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        levelMap[y][x] = 0;
+                        addShell(x * blockSize, y * blockSize - blockSize);
+                    }
+
+                    if (blockType == 13) { //block
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                mario.y = blockTop - hitboxHeight - hitboxOffset;
+                                mario.jumping = false;
+                                mario.jumpSpeed = 0;
+                                if (mario.winAnimation == 1) {
+                                    mario.winAnimation = 2;
+                                    cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
+                                    setTimeout(function () {
+                                        mario.winAnimation = 0;
+                                    }, 5000);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                mario.y = blockBottom - hitboxOffset;
+                                mario.jumpSpeed = 0;
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                mario.x = blockLeft - mario.width;
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                mario.x = blockRight;
+                            }
+                        }
+                    }
+
+                    if (blockType == 14) { //flagpole middle
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                        }
+                    }
+
+                    if (blockType == 15) { //flagpole top
+                        const blockX = x * blockSize;
+                        const blockY = y * blockSize;
+                        const blockTop = blockY;
+                        const blockBottom = blockY + blockSize;
+                        const blockLeft = blockX;
+                        const blockRight = blockX + blockSize;
+
+                        if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                            // Collision from top
+                            if (prevBottom <= blockTop && marioBottom > blockTop) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    coins += 100;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                            // Collision from bottom
+                            else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    coins += 100;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                            // Collision from left
+                            else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    coins += 100;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                            // Collision from right
+                            else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                                if (mario.winAnimation == 0) {
+                                    mario.winAnimation = 1;
+                                    mario.x = blockX;
+                                    coins += 100;
+                                    cGL.stopBackgroundMusic();
+                                    cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (let i = 0; i < entities.length; i++) {
+                const entityType = entities[i].id;
+                if (entityType == 1) { //goomba
+                    const blockX = entities[i].x;
+                    const blockY = entities[i].y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + entities[i].height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + entities[i].width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top mario stomps on us
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            entities.splice(i, 1);
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from bottom
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            die();
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            die();
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            die();
+                        }
+                    }
+                }
+                if (entityType == 2) { //mushroom
+                    const blockX = entities[i].x;
+                    const blockY = entities[i].y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + entities[i].height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + entities[i].width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top mario stomps on us
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            entities.splice(i, 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                        // Collision from bottom
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            entities.splice(i, 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            entities.splice(i, 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            entities.splice(i, 1);
+                            mario.powerUp = 1;
+                            cGL.playSound(`${assetsDirectory}/sounds/mushroom.mp3`);
+                        }
+                    }
+                }
+                if (entityType == 3) { //koopa
+                    const blockX = entities[i].x;
+                    const blockY = entities[i].y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + entities[i].height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + entities[i].width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top mario stomps on us
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            const x = blockX;
+                            const y = blockY + 8;
+                            entities.splice(i, 1);
+                            addShell(x, y);
+                            cGL.playSound(`${assetsDirectory}/sounds/stomp.mp3`);
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from bottom
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            die();
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            die();
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            die();
+                        }
+                    }
+                }
+                if (entityType == 4) { //shell
+                    const blockX = entities[i].x;
+                    const blockY = entities[i].y;
+                    const blockTop = blockY;
+                    const blockBottom = blockY + entities[i].height;
+                    const blockLeft = blockX;
+                    const blockRight = blockX + entities[i].width;
+
+                    if (marioRight > blockLeft && marioLeft < blockRight && marioBottom > blockTop && marioTop < blockBottom) {
+                        // Collision from top mario stomps on us
+                        if (prevBottom <= blockTop && marioBottom > blockTop) {
+                            if (entities[i].moving) {
+                                entities[i].moving = false;
+                            } else {entities[i].moving = true;}
+                            mario.jumping = true;
+                            mario.jumpSpeed = -15;
+                        }
+                        // Collision from bottom
+                        else if (prevTop >= blockBottom && marioTop < blockBottom) {
+                            if (entities[i].moving) {
+                                die();
+                            }
+                        }
+                        // Collision from left
+                        else if (prevRight <= blockLeft && marioRight > blockLeft) {
+                            if (entities[i].moving) {
+                                die();
+                            } else {
+                                entities[i].direction = "right";
+                                entities[i].moving = true;
+                            }
+                        }
+                        // Collision from right
+                        else if (prevLeft >= blockRight && marioLeft < blockRight) {
+                            if (entities[i].moving) {
+                                die();
+                            } else {
+                                entities[i].direction = "left";
+                                entities[i].moving = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Update ground level based on collisions
+            if (!mario.jumping) {
+                mario.groundLevel = canvas.height - 128;
+                for (let y = 0; y < levelMap.length; y++) {
+                    for (let x = 0; x < levelMap[y].length; x++) {
+                        const blockType = levelMap[y][x];
+                        if (blockType !== 0) {
+                            const blockX = x * blockSize;
+                            const blockY = y * blockSize;
+                            const blockTop = blockY;
+                            const blockBottom = blockY + blockSize;
+                            const blockLeft = blockX;
+                            const blockRight = blockX + blockSize;
+
+                            if (marioRight > blockLeft && marioLeft < blockRight && marioBottom >= blockTop && marioTop < blockBottom) {
+                                mario.groundLevel = blockTop - hitboxHeight - hitboxOffset;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderBlocks() {
+            const blockSize = mario.width;
+            for (let y = 0; y < levelMap.length; y++) {
+                for (let x = 0; x < levelMap[y].length; x++) {
+                    const blockType = levelMap[y][x];
+                    if (blockType !== 0) {
+                        const blockTexture = blockTextures[blockType];
+                        const xPos = (x * blockSize) + camera.x;
+                        const yPos = (y * blockSize) + camera.y;
+                        cGL.drawImage(`block${blockType}`, xPos, yPos, blockSize, blockSize);
+                    }
+                }
+            }
+        }
+
+        function renderMario() {
+            let marioImageId;
+            if (mario.powerUp == 0) {
+                if (mario.jumping) {
+                    marioImageId = mario.direction === 'right' ? 'marioRight4' : 'marioLeft4';
+                } else {
+                    marioImageId = mario.direction === 'right' ? `marioRight${mario.frame}` : `marioLeft${mario.frame}`;
+                }
+            } else if (mario.powerUp == 1) {
+                if (mario.jumping) {
+                    marioImageId = mario.direction === 'right' ? 'marioBigRight4' : 'marioBigLeft4';
+                } else {
+                    marioImageId = mario.direction === 'right' ? `marioBigRight${mario.frame}` : `marioBigLeft${mario.frame}`;
+                }
+            }
+            if (mario.visible) {
+                if (mario.winAnimation == 1) {
+                    if (mario.powerUp == 0) {
+                        cGL.drawImage("marioSmallFlag", mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+                    }
+                    if (mario.powerUp == 1) {
+                        cGL.drawImage("marioBigFlag", mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+                    }
+                } else {
+                    if (mario.deathAnimation) {
+                        cGL.drawImage("marioDeathSprite", mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+                    } else {
+                        cGL.drawImage(marioImageId, mario.x + camera.x, mario.y + camera.y, mario.width, mario.height);
+                    }
+                }
+            }
+        }
+
+        function renderEntities() {
+            for (let i = 0; i < entities.length; i++) {
+                entities[i].render();
+            }
+        }
+
+        function renderCoinCounter() {
+            const text = `Coins: ${coinsCollected}`;
+            const x = canvas.width / 2;
+            const y = 30;
+            cGL.drawText(text, x, y, "24px '8bit'", "black", "center", "top");
+        }
+
+        function renderMouseBlockPos() {
+            cGL.drawText(mouseBlockPos, 0, 0, "24px '8bit'", "black", "left", "top");
+            cGL.drawImage(`block${editorCurrentBlock}`, 0, 25, 32, 32);
+            cGL.drawText(editorCurrentBlock, 32, 25, "24px '8bit'", "black", "left", "top");
+            cGL.drawImage(`block${editorCurrentBlock}`, (Math.floor(cGL.mousePos.x/64) + ((camera.x / 64) % 1)) * 64, (Math.floor(cGL.mousePos.y/64) + ((camera.y / 64) % 1)) * 64, 64, 64);
+        }
+
+        function renderTitle() {
+            cGL.drawImage("title", (canvas.width / 2) - (352 / 2), canvas.height / 4, 352, 286);
+        }
+
+        function checkPlayButton() {
+            if (cGL.buttons.playButton.pressed) {
+                entities = [];
+                originalLevelMap = deepCloneArray(levelMap);
+                mario.x = spawnPoint.x;
+                mario.y = spawnPoint.y;
+                lives = startingLives;
+                coinsCollected = 0;
+                renderingState = 2; // we will set this to 1 for level select later
+                cGL.removeButton("playButton");
+                //cGL.removeButton("onlineLevelPlayButton");
+                if (cGL.mobile) {
+                    cGL.removeButton("fakeSoundButton");
+                }
+                cGL.removeButton("editStartButton");
+                cGL.removeButton("changeUsernameButton");
+                cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                setTimeout(function() {cGL.removeButton("onlineLevelPlayButton");}, 1000);
+            }
+            try {
+                if (cGL.buttons.editStartButton.pressed) {
+                    cGL.removeButton("editStartButton");
+                    cGL.removeButton("playButton");
+                    //cGL.removeButton("onlineLevelPlayButton");
+                    if (cGL.mobile) {
+                        cGL.removeButton("fakeSoundButton");
+                    }
+                    cGL.removeButton("changeUsernameButton");
+                    editorEnabled = true;
+                    renderingState = 3;
+                    cGL.addButton("editPlayLevelButton", 0, 60, 60, 40, true, "Play!");
+                    cGL.addButton("editorHelpButton", 70, 60, 40, 40, true, "?");
+                    cGL.addButton("exportLevelButton", 0, 110, 110, 40, true, "Export");
+                    cGL.addButton("importLevelButton", 0, 160, 110, 40, true, "Import");
+                    cGL.addButton("uploadLevelButton", 0, 210, 110, 40, true, "Upload");
+                    cGL.stopBackgroundMusic();
+                    setTimeout(function() {
+                        allowPlacing = true;
+                        cGL.removeButton("onlineLevelPlayButton");
+                    }, 1000);
+                }
+            }
+            catch(err) {}
+
+            try {
+                if (cGL.buttons.onlineLevelPlayButton.pressed && canExportLevel) {
+                    canExportLevel = false;
+                    entities = [];
+                    originalLevelMap = deepCloneArray(levelMap);
+                    mario.x = spawnPoint.x;
+                    mario.y = spawnPoint.y;
+                    lives = startingLives;
+                    coinsCollected = 0;
+                    setTimeout(function() {
+                        importOnlineLevel(prompt("Enter the level id"), function(json) {
+                            levelMap = [[0]];
+                            setTimeout(function() {
+                                levelMap = json.levelMap;
+                                console.log(json);
+                                cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+                                setTimeout(function() {
+                                    renderingState = 2;
+                                    cGL.removeButton("playButton");
+                                    cGL.removeButton("onlineLevelPlayButton");
+                                    if (cGL.mobile) {
+                                        cGL.removeButton("fakeSoundButton");
+                                    }
+                                    cGL.removeButton("editStartButton");
+                                }, 500)
+                            }, 10)
+                            setTimeout(function() {
+                                canExportLevel = true;
+                            }, 2000)
+                        });
+                    }, 1000)
+                }
+            }
+            catch(err) {}
+
+            try {
+                if (cGL.buttons.changeUsernameButton.pressed && canChangeUsername) {
+                    canChangeUsername = false;
+                    setTimeout(function() {
+                        var name = prompt("Enter your username");
+                        cGL.saveData("username", name);
+                        username = name;
+                    }, 100);
+                    setTimeout(function() {
+                        canChangeUsername = true;
+                    }, 1000);
+
+                }
+            }
+            catch(err) {}
+
+            if (cGL.keysDown[69]) { // E
+                cGL.addButton("editStartButton", (canvas.width / 2) - (100 /2), (canvas.height / 8 * 7) + 50, 100, 40, true, "Edit");
+            }
+        }
+
+        function renderDeathScreen() {
+            cGL.drawBackground("black");
+            const text = `Lives: ${lives}`;
+            const x = canvas.width / 2;
+            const y = canvas.height/ 2;
+            cGL.drawText(text, x, y, "24px '8bit'", "white", "center", "top");
+        }
+
+        function renderEditorHelp() {
+            cGL.drawImage("editorControls", (canvas.width / 2) - 400, (canvas.height / 2) - 300, 800, 600);
+        }
+
+        function render() {
+            cGL.clear();
+            if (renderingState == 2) {
+                cGL.drawBackground(backgroundColor);
+                renderBlocks();
+                renderEntities();
+                renderMario();
+                renderCoinCounter();
+            } else if (renderingState == 0) {
+                cGL.drawBackground("#9494ff");
+                renderTitle();
+                checkPlayButton();
+            } else if (renderingState == 3) {
+                cGL.drawBackground(backgroundColor);
+                renderBlocks();
+                renderMouseBlockPos();
+                if (showingEditorHelp) {
+                    renderEditorHelp();
+                }
+            } else if (renderingState == 4) {
+                renderDeathScreen();
+            // start screen
+            } else if (renderingState == -1) {
+                cGL.drawImage("startup", (canvas.width / 2) - 640, (canvas.height / 2) - 360, 1280, 720);
+                if (cGL.mouseDown || cGL.keyDown) {
+                    setTimeout(function() {
+                        if (!playedStartupCoinSound) {
+                            playedStartupCoinSound = true;
+                            cGL.playSound(`${assetsDirectory}/sounds/coin.mp3`);
+                            setTimeout(function() {
+                                renderingState = -2;
+                            }, 500);
+                        }
+                    }, 200);
+                }
+            // start screen fade animation
+            } else if (renderingState == -2) {
+                cGL.drawImage("startup", (canvas.width / 2) - 640, (canvas.height / 2) - 360, 1280, 720, startScreenOpacity);
+                startScreenOpacity -= 0.01;
+                if (startScreenOpacity <= 0.02) {
+                    cGL.addButton("playButton", (canvas.width / 2) - (100 /2), canvas.height / 4 * 3, 100, 40, true, "Play!");
+                    if (cGL.mobile) {
+                        cGL.addButton("fakeSoundButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound");
+                    }
+                    cGL.addButton("onlineLevelPlayButton", (canvas.width / 2) - (100 /2) - 120, canvas.height / 4 * 3, 100, 40, true, "Online");
+                    cGL.addButton("changeUsernameButton", canvas.width - 150, 0, 150, 40, true, "Change Username");
+                    renderingState = 0;
+                    setTimeout(function() {
+                        cGL.startBackgroundMusic(`${assetsDirectory}/sounds/title_music.mp3`);
+                    }, 1000);
+                }
+            }
+            if (cGL.keysDown[77]) {
+                cGL.drawText(`mousePos: (${cGL.mousePos.x}, ${cGL.mousePos.y})`, canvas.width / 2, canvas.height / 2, "24px '8bit'", "white", "center", "top");
+            }
+        }
+
+        function loop(timestamp) {
+            var elapsed = timestamp - lastTime;
+            if (elapsed > frameInterval) {
+                if (renderingState == 2) {
+                    game();
+                }
+                if (renderingState == 3) {
+                    edit();
+                }
+                render();
+                cGL.renderButtons();
+                cGL.loop();
+                lastTime = timestamp - (elapsed % frameInterval);
+            }
+            requestAnimationFrame(loop);
+        }
+
+        var lastTime = 0;
+        var frameInterval = 1000 / 60;
+        ctx.imageSmoothingEnabled = false;
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>

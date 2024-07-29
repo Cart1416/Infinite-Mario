@@ -1,0 +1,17 @@
+0: air
+1: ground
+2: brick
+3: empty ? block
+4: coin
+5: coin ? block
+6: mushroom ? block
+7: non moving mushroom
+8: infinite coins ? block
+9: goomba
+10: mushroom
+11: koopa
+12: shell
+13: block?
+14: flagpole middle
+15: flagpole top
+16: flag
