@@ -2226,7 +2226,7 @@
                 if (cGL.buttons.changeUsernameButton.pressed && canChangeUsername) {
                     canChangeUsername = false;
                     setTimeout(function() {
-                        var name = prompt("Enter your username");
+                        var name = prompt("Enter a new username");
                         cGL.saveData("username", name);
                         username = name;
                     }, 100);
@@ -2300,7 +2300,7 @@
                         cGL.addButton("fakeSoundButton", (canvas.width / 2) - (100 /2), canvas.height / 8 * 7, 100, 40, true, "Enable Sound");
                     }
                     cGL.addButton("onlineLevelPlayButton", (canvas.width / 2) - (100 /2) - 120, canvas.height / 4 * 3, 100, 40, true, "Online");
-                    cGL.addButton("changeUsernameButton", canvas.width - 150, 0, 150, 40, true, "Change Username");
+                    cGL.addButton("changeUsernameButton", canvas.width - 150, 0, 150, 40, true, username);
                     renderingState = 0;
                     setTimeout(function() {
                         cGL.startBackgroundMusic(`${assetsDirectory}/sounds/title_music.mp3`);
