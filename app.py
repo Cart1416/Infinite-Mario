@@ -7,7 +7,8 @@ import random
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = 'levels'
+LEVELS_FOLDER = 'levels'
+IMAGES_FOLDER = 'images'
 
 @app.route('/')
 def hello_world():
@@ -27,16 +28,16 @@ def upload_level():
     if file:
         level_id = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
         filename = f"{level_id}.json"
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        filepath = os.path.join(LEVELS_FOLDER, filename)
         file.save(filepath)
         return jsonify({"message": f"Level uploaded successfully. ID: {level_id}", "filename": filename}), 200
 
 @app.route('/get_level/<level_id>', methods=['GET'])
 def get_level(level_id):
     filename = f"{level_id}.json"
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    filepath = os.path.join(LEVELS_FOLDER, filename)
     if os.path.exists(filepath):
-        return send_from_directory(UPLOAD_FOLDER, filename)
+        return send_from_directory(LEVELS_FOLDER, filename)
     else:
         return jsonify({"error": "Level not found"}), 404
 
