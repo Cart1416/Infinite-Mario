@@ -2136,7 +2136,12 @@
             cGL.drawText(mouseBlockPos, 0, 0, "24px '8bit'", "black", "left", "top");
             cGL.drawImage(`block${editorCurrentBlock}`, 0, 25, 32, 32);
             cGL.drawText(editorCurrentBlock, 32, 25, "24px '8bit'", "black", "left", "top");
-            cGL.drawImage(`block${editorCurrentBlock}`, (Math.floor(cGL.mousePos.x/64) + ((camera.x / 64) % 1)) * 64, (Math.floor(cGL.mousePos.y/64) + ((camera.y / 64) % 1)) * 64, 64, 64);
+            var mouseBlockPos2 = {
+                x: (Math.floor(cGL.mousePos.x/64-camera.x/64) * 64),
+                y: (Math.floor(cGL.mousePos.y/64-camera.y/64) * 64)
+            }
+            //cGL.drawImage(`block${editorCurrentBlock}`, (Math.floor(cGL.mousePos.x/64) + ((camera.x / 64) % 1)) * 64, (Math.floor(cGL.mousePos.y/64) + ((camera.y / 64) % 1)) * 64, 64, 64);
+            cGL.drawImage(`block${editorCurrentBlock}`, mouseBlockPos2.x + camera.x, mouseBlockPos2.y + camera.y, 64, 64);
         }
 
         function renderTitle() {
