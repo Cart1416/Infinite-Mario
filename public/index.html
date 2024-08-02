@@ -1155,9 +1155,20 @@
                     setTimeout(function() {allowPlacing = true;}, 100);
                     levelMap = deepCloneArray(originalLevelMap);
                     renderingState = 3;
+                    mario.winAnimation = 0;
                     cGL.stopBackgroundMusic();
                 }
             } catch(err) {}
+        }
+
+        function backToEditor() {
+            cGL.buttons.editPlayLevelButton.text = "Play!";
+            allowPlacing = false;
+            setTimeout(function() {allowPlacing = true;}, 100);
+            levelMap = deepCloneArray(originalLevelMap);
+            renderingState = 3;
+            mario.winAnimation = 0;
+            cGL.stopBackgroundMusic();
         }
 
         function changeBlock(x, y, id, recursionDepth = 0) {
@@ -1396,6 +1407,9 @@
                                     cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
                                     setTimeout(function () {
                                         mario.winAnimation = 0;
+                                        if (editorEnabled) {
+                                            backToEditor();
+                                        }
                                     }, 5000);
                                 }
                             }
@@ -1433,6 +1447,9 @@
                                     cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
                                     setTimeout(function () {
                                         mario.winAnimation = 0;
+                                        if (editorEnabled) {
+                                            backToEditor();
+                                        }
                                     }, 5000);
                                 }
                             }
@@ -1474,6 +1491,9 @@
                                     cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
                                     setTimeout(function () {
                                         mario.winAnimation = 0;
+                                        if (editorEnabled) {
+                                            backToEditor();
+                                        }
                                     }, 5000);
                                 }
                             }
@@ -1546,6 +1566,9 @@
                                     cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
                                     setTimeout(function () {
                                         mario.winAnimation = 0;
+                                        if (editorEnabled) {
+                                            backToEditor();
+                                        }
                                     }, 5000);
                                 }
                             }
@@ -1586,6 +1609,9 @@
                                     cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
                                     setTimeout(function () {
                                         mario.winAnimation = 0;
+                                        if (editorEnabled) {
+                                            backToEditor();
+                                        }
                                     }, 5000);
                                 }
                             }
@@ -1662,6 +1688,9 @@
                                     cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
                                     setTimeout(function () {
                                         mario.winAnimation = 0;
+                                        if (editorEnabled) {
+                                            backToEditor();
+                                        }
                                     }, 5000);
                                 }
                             }
@@ -1745,7 +1774,9 @@
                                     mario.winAnimation = 2;
                                     cGL.playSound(`${assetsDirectory}/sounds/level_clear.mp3`);
                                     setTimeout(function () {
-                                        mario.winAnimation = 0;
+                                        if (editorEnabled) {
+                                            backToEditor();
+                                        }
                                     }, 5000);
                                 }
                             }
@@ -1827,7 +1858,7 @@
                                 if (mario.winAnimation == 0) {
                                     mario.winAnimation = 1;
                                     mario.x = blockX;
-                                    coins += 100;
+                                    coinsCollected += 100;
                                     cGL.stopBackgroundMusic();
                                     cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
                                 }
@@ -1837,7 +1868,7 @@
                                 if (mario.winAnimation == 0) {
                                     mario.winAnimation = 1;
                                     mario.x = blockX;
-                                    coins += 100;
+                                    coinsCollected += 100;
                                     cGL.stopBackgroundMusic();
                                     cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
                                 }
@@ -1847,7 +1878,7 @@
                                 if (mario.winAnimation == 0) {
                                     mario.winAnimation = 1;
                                     mario.x = blockX;
-                                    coins += 100;
+                                    coinsCollected += 100;
                                     cGL.stopBackgroundMusic();
                                     cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
                                 }
@@ -1857,7 +1888,7 @@
                                 if (mario.winAnimation == 0) {
                                     mario.winAnimation = 1;
                                     mario.x = blockX;
-                                    coins += 100;
+                                    coinsCollected += 100;
                                     cGL.stopBackgroundMusic();
                                     cGL.playSound(`${assetsDirectory}/sounds/flagpole.mp3`);
                                 }
