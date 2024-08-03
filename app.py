@@ -4,11 +4,22 @@ import os
 import time
 import string
 import random
+from datetime import datetime
 
 app = Flask(__name__)
 
 LEVELS_FOLDER = 'levels'
+OFFICIAL_LEVELS_FOLDER = 'officiallevels'
 IMAGES_FOLDER = 'images'
+
+
+os.makedirs(LEVELS_FOLDER, exist_ok=True)
+os.makedirs(OFFICIAL_LEVELS_FOLDER, exist_ok=True)
+os.makedirs(IMAGES_FOLDER, exist_ok=True)
+
+
+# Launch_Date = datetime(2024, 10, 1) # october 1
+Launch_Date = datetime(2024, 8, 1) #temp for test
 
 @app.route('/')
 def hello_world():
@@ -17,6 +28,25 @@ def hello_world():
 @app.route('/<path:path>')
 def send_static(path):
     return send_from_directory("public", path)
+
+#get numericalid of today's level
+@app.route('/leveltodayid', methods=['GET'])
+def leveltodayid():
+    today = datetime.now()
+    levelnum = (today - Launch_Date).days + 1
+    return str(levelnum)
+
+@app.route('/getofficiallevel/<level_id>', methods=['GET'])
+def getofficiallevel(level_id):
+    today = datetime.now()
+    maxlevelnum = (today - Launch_Date).days + 1
+    levelidint = int(level_id)
+    if levelidint > maxlevelnum or levelidint < 1:
+        return "access denied", 403
+    else:
+        filename = f"{level_id}.json"
+        filepath = os.path.join(OFFICIAL_LEVELS_FOLDER, filename)
+        return send_from_directory(OFFICIAL_LEVELS_FOLDER, filename)
 
 @app.route('/upload', methods=['POST'])
 def upload_level():

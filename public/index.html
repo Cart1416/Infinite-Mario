@@ -72,7 +72,7 @@
         <form method="dialog" id="uploadForm">
             <input type="text" id="levelName" placeholder="Enter Level Name" />
             <input type="text" id="levelImage" placeholder="Enter Image Link" />
-            <button type="submit">Submit</button>
+            <button type="submit">Upload!</button>
         </form>
     </dialog>
     <div id="center">
@@ -172,6 +172,8 @@
         cGL.loadImage("KoopaRight1", `${assetsDirectory}/entities/KoopaRight1.png`);
         cGL.loadImage("Shell", `${assetsDirectory}/entities/Shell.png`);
         cGL.loadImage("mouseImg", `${assetsDirectory}/mouse.png`);
+        cGL.loadImage("loading", `${assetsDirectory}/loading.png`);
+        cGL.loadImage("currentLevelImage", `${assetsDirectory}/loading.png`);
 
         // Define your level map
         var levelMap = [
@@ -210,8 +212,9 @@
         var backgroundColor = "#9494ff";
         var spawnPoint = {x: 64, y: 64 * 3}
         var startingLives = 5;
-        var currentLevelAuthor = "";
-        var currentLevelName = "";
+        var currentLevelAuthor = "Loading";
+        var currentLevelName = "Loading";
+        var currentLevelImageUrl = "";
 
         var gamePadAvailable = false;
         var gamePadPressed = false;
@@ -239,6 +242,16 @@
         var canToggleEditorHelp = true;
         var canExportLevel = true;
         var canChangeUsername = true;
+        var previousButtonValues = {playLevelFromLevelSelectButton: false, levelSelectLeft: false, levelSelectNum: false, levelSelectRight: false};
+
+        var levelSelectID = 0;
+        var maximumLevelID = 0;
+
+        cGL.webRequest(`${levelServer}/leveltodayid`, "GET", "", function(error, data) {
+            console.log(data);
+            levelSelectID = data;
+            maximumLevelID = data;
+        });
 
         var camera = {
             x: 0,
@@ -340,6 +353,24 @@
 
         function importOnlineLevel(levelID, callback) {
             fetch(`${levelServer}/get_level/${levelID}`)
+            .then(response => {
+                if (!response.ok) {
+                    alert("level not found")
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Level data:', data);
+                callback(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function importOfficialLevel(levelID, callback) {
+            fetch(`${levelServer}/getofficiallevel/${levelID}`)
             .then(response => {
                 if (!response.ok) {
                     alert("level not found")
@@ -1280,7 +1311,8 @@
                         backgroundColor: backgroundColor,
                         spawnPoint: spawnPoint,
                         startingLives: startingLives,
-                        levelMap: levelMap
+                        levelMap: levelMap,
+                        imageUrl: ""
                     }, null, 2);
                     var blob = new Blob([json], { type: 'application/json' });
                     var a = document.createElement('a');
@@ -1312,6 +1344,7 @@
                         startingLives = json.startingLives;
                         currentLevelAuthor = json.authorName;
                         currentLevelName = json.levelName;
+                        currentLevelImageUrl = json.imageUrl
                     });
                 }, 1000)
                 setTimeout(function() {
@@ -2188,22 +2221,44 @@
                 mario.y = spawnPoint.y;
                 lives = startingLives;
                 coinsCollected = 0;
-                renderingState = 2; // we will set this to 1 for level select later
+                var y = 0;
+                cGL.addButton("playLevelFromLevelSelectButton", (canvas.width / 2) - (100 /2), canvas.height - 100, 100, 40, true, "Play!");
+                y = canvas.height - 50;
+                cGL.addButton("levelSelectLeft", (canvas.width / 2) - (40 /2) - 110, y, 40, 40, true, "←");
+                cGL.addButton("levelSelectNum", (canvas.width / 2) - (100 /2), y, 100, 40, true, `${levelSelectID}`);
+                cGL.addButton("levelSelectRight", (canvas.width / 2) - (40 /2) + 110, y, 40, 40, true, "→");
+                renderingState = 1; // we will set this to 1 for level select
                 cGL.removeButton("playButton");
-                //cGL.removeButton("onlineLevelPlayButton");
                 if (cGL.mobile) {
                     cGL.removeButton("fakeSoundButton");
                 }
                 cGL.removeButton("editStartButton");
                 cGL.removeButton("changeUsernameButton");
-                cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
-                setTimeout(function() {cGL.removeButton("onlineLevelPlayButton");}, 1000);
+                currentLevelAuthor = "Loading";
+                currentLevelName = "Loading";
+                importOfficialLevel(levelSelectID, function(json) {
+                    levelMap = [[0]];
+                    setTimeout(function() {
+                        levelMap = json.levelMap;
+                        backgroundMusic = json.backgroundMusic;
+                        backgroundColor = json.backgroundColor;
+                        spawnPoint = json.spawnPoint;
+                        startingLives = json.startingLives;
+                        currentLevelAuthor = json.authorName;
+                        currentLevelName = json.levelName;
+                        currentLevelImageUrl = json.imageUrl;
+                        console.log(json);
+                        cGL.loadImage("currentLevelImage", json.imageUrl);
+                    }, 10)
+                });
+                setTimeout(function() {
+                    cGL.removeButton("onlineLevelPlayButton");
+                }, 100);
             }
             try {
                 if (cGL.buttons.editStartButton.pressed) {
                     cGL.removeButton("editStartButton");
                     cGL.removeButton("playButton");
-                    //cGL.removeButton("onlineLevelPlayButton");
                     if (cGL.mobile) {
                         cGL.removeButton("fakeSoundButton");
                     }
@@ -2292,26 +2347,134 @@
             cGL.drawImage("editorControls", (canvas.width / 2) - 400, (canvas.height / 2) - 300, 800, 600);
         }
 
+        function renderLevelSelect() {
+            cGL.drawImage("currentLevelImage", (canvas.width / 2) - 256 / 2, (canvas.height / 2) - 256 / 2, 256, 256);
+            cGL.drawText("Official Levels", canvas.width / 2, 100, "24px '8bit'", "white", "center", "top");
+            cGL.drawText(currentLevelName, canvas.width / 2, 200, "24px '8bit'", "white", "center", "top");
+        }
+
+        function checkLevelSelectButtons() {
+            if (cGL.buttons.levelSelectLeft.pressed && !previousButtonValues.levelSelectLeft) {
+                if (!(levelSelectID < 1)) {
+                    --levelSelectID;
+                    currentLevelAuthor = "Loading";
+                    currentLevelName = "Loading";
+                    importOfficialLevel(levelSelectID, function(json) {
+                        levelMap = [[0]];
+                        setTimeout(function() {
+                            levelMap = json.levelMap;
+                            backgroundMusic = json.backgroundMusic;
+                            backgroundColor = json.backgroundColor;
+                            spawnPoint = json.spawnPoint;
+                            startingLives = json.startingLives;
+                            currentLevelAuthor = json.authorName;
+                            currentLevelName = json.levelName;
+                            currentLevelImageUrl = json.imageUrl;
+                            console.log(json);
+                            cGL.loadImage("currentLevelImage", json.imageUrl);
+                        }, 10)
+                        cGL.buttons.levelSelectNum.text = String(levelSelectID);
+                    });
+                }
+            }
+            if (cGL.buttons.levelSelectRight.pressed && !previousButtonValues.levelSelectRight) {
+                if (!(levelSelectID > maximumLevelID + 1)) {
+                    ++levelSelectID;
+                    currentLevelAuthor = "Loading";
+                    currentLevelName = "Loading";
+                    importOfficialLevel(levelSelectID, function(json) {
+                        levelMap = [[0]];
+                        setTimeout(function() {
+                            levelMap = json.levelMap;
+                            backgroundMusic = json.backgroundMusic;
+                            backgroundColor = json.backgroundColor;
+                            spawnPoint = json.spawnPoint;
+                            startingLives = json.startingLives;
+                            currentLevelAuthor = json.authorName;
+                            currentLevelName = json.levelName;
+                            currentLevelImageUrl = json.imageUrl;
+                            console.log(json);
+                            cGL.loadImage("currentLevelImage", json.imageUrl);
+                        }, 10)
+                        cGL.buttons.levelSelectNum.text = String(levelSelectID);
+                    });
+                }
+            }
+            if (cGL.buttons.levelSelectNum.pressed && !previousButtonValues.levelSelectNum) {
+                const theLevelIDToSetOrWhateverYouWantToCallThisVariableYeahLetsJustMakeItLongBecauseLolAlsoLuigiComingSoon = prompt(`Enter a number between 1 and ${maximumLevelID}`);
+                levelSelectID = Number(theLevelIDToSetOrWhateverYouWantToCallThisVariableYeahLetsJustMakeItLongBecauseLolAlsoLuigiComingSoon);
+                cGL.buttons.levelSelectNum.text = theLevelIDToSetOrWhateverYouWantToCallThisVariableYeahLetsJustMakeItLongBecauseLolAlsoLuigiComingSoon;
+                currentLevelAuthor = "Loading";
+                currentLevelName = "Loading";
+                importOfficialLevel(levelSelectID, function(json) {
+                    levelMap = [[0]];
+                    setTimeout(function() {
+                        levelMap = json.levelMap;
+                        backgroundMusic = json.backgroundMusic;
+                        backgroundColor = json.backgroundColor;
+                        spawnPoint = json.spawnPoint;
+                        startingLives = json.startingLives;
+                        currentLevelAuthor = json.authorName;
+                        currentLevelName = json.levelName;
+                        currentLevelImageUrl = json.imageUrl;
+                        console.log(json);
+                        cGL.loadImage("currentLevelImage", json.imageUrl);
+                    }, 10)
+                });
+            }
+
+            previousButtonValues.levelSelectLeft = cGL.buttons.levelSelectLeft.pressed;
+            previousButtonValues.levelSelectNum = cGL.buttons.levelSelectNum.pressed;
+            previousButtonValues.levelSelectRight = cGL.buttons.levelSelectRight.pressed;
+
+            if (cGL.buttons.playLevelFromLevelSelectButton.pressed && !previousButtonValues.playLevelFromLevelSelectButton) {
+                entities = [];
+                originalLevelMap = deepCloneArray(levelMap);
+                mario.x = spawnPoint.x;
+                mario.y = spawnPoint.y;
+                lives = startingLives;
+                coinsCollected = 0;
+                renderingState = 2;
+                cGL.removeButton("playLevelFromLevelSelectButton");
+                cGL.removeButton("levelSelectLeft");
+                cGL.removeButton("levelSelectNum");
+                cGL.removeButton("levelSelectRight");
+                cGL.startBackgroundMusic(`${assetsDirectory}/sounds/` + backgroundMusic);
+            }
+
+            try {
+                previousButtonValues.playLevelFromLevelSelectButton = cGL.buttons.playLevelFromLevelSelectButton.pressed;
+            }
+            catch (e) {}
+        }
+
         function render() {
             cGL.clear();
-            if (renderingState == 2) {
+            if (renderingState == 2) { //play
                 cGL.drawBackground(backgroundColor);
                 renderBlocks();
                 renderEntities();
                 renderMario();
                 renderCoinCounter();
-            } else if (renderingState == 0) {
+            } else if (renderingState == 0) { //title screen
                 cGL.drawBackground("#9494ff");
+                //renderBlocks();
                 renderTitle();
                 checkPlayButton();
-            } else if (renderingState == 3) {
+            } else if (renderingState == 1) { //level select
+                cGL.drawBackground("#9494ff");
+                //renderTitle();
+                //checkPlayButton();
+                renderLevelSelect();
+                checkLevelSelectButtons();
+            } else if (renderingState == 3) { // edit
                 cGL.drawBackground(backgroundColor);
                 renderBlocks();
                 renderMouseBlockPos();
                 if (showingEditorHelp) {
                     renderEditorHelp();
                 }
-            } else if (renderingState == 4) {
+            } else if (renderingState == 4) { //death screen
                 renderDeathScreen();
             // start screen
             } else if (renderingState == -1) {
